@@ -36,7 +36,8 @@ class DiagnosisAgent:
             analysis_result["target_profile"] = "Productivity"
             analysis_result["target_role"] = "Writing-Agent" # Could also be Teacher-Agent
             analysis_result["confidence_score"] = 0.90
-        elif "develop" in prompt_lower or "create code" in prompt_lower or "plan" in prompt_lower or "design" in prompt_lower or "implement" in prompt_lower:
+        elif ("develop" in prompt_lower and ("code" in prompt_lower or "plan" in prompt_lower or "design" in prompt_lower or "implement" in prompt_lower)) or \
+             "create code" in prompt_lower or "plan" in prompt_lower or "design" in prompt_lower or "implement" in prompt_lower:
             analysis_result["classified_nature"] = "development_task"
             analysis_result["operational_mode"] = "Plan"
             analysis_result["target_profile"] = "Developer"
