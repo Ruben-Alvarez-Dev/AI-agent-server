@@ -1,186 +1,204 @@
 # Commit Log
 
-## Commit 1: feat: Add DiagnosisAgent placeholder
-- Created `src/agents/developer/diagnosis_agent.py`.
-- Added placeholder logic for analyzing user requests, classifying intent, determining operational mode, and identifying target profile/role.
+Este es el historial de commits del proyecto, generado a partir del `git log`.
 
+## Commit 1: 88b44a9 - Initial commit
+- Commit inicial del proyecto.
 
-## Commit 2: feat: Add PlannerAgent placeholder
-- Created `src/agents/developer/planner_agent.py`.
-- Added placeholder logic for creating plans and adding checkpoints.
+## Commit 2: d535255 - Initial commit: Cleaned project
+- Limpieza inicial del proyecto, eliminando archivos innecesarios.
 
+## Commit 3: 3b21738 - feat: Add DiagnosisAgent placeholder
+- Creación del placeholder para el `DiagnosisAgent`.
 
-## Commit 3: feat: Add VisionAgent placeholder
-- Created `src/agents/developer/vision_agent.py`.
-- Added placeholder logic for processing image descriptions and interpreting visual input.
+## Commit 4: bf685ef - feat: Add PlannerAgent placeholder
+- Creación del placeholder para el `PlannerAgent`.
 
+## Commit 5: ffbd5df - feat: Add PlannerAgent placeholder (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 4: feat: Integrate core components in OrchestrationEngine
-- Updated `src/core/orchestration_engine.py` to integrate `TaskStateManager`, `LoadBalancer`, `DiagnosisAgent`, `OllamaEngine`, and `OpenAI Engine`.
-- Modified `process_request` to simulate routing and component interaction.
+## Commit 6: 96ad2e2 - docs: Add commit log for DiagnosisAgent
+- Creación inicial del `commit_log.md` con el `DiagnosisAgent`.
 
+## Commit 7: 466cb4f - docs: Update commit log with PlannerAgent and VisionAgent
+- Actualización del `commit_log.md` con `PlannerAgent` y `VisionAgent`.
 
-## Commit 5: feat: Implement OrchestrationEngine LLM interaction and task state updates
-- Enhanced `OrchestrationEngine.process_request` to make actual calls to LLM engines and update task states.
+## Commit 8: 2d27f05 - feat: Add more detail to VisionAgent placeholder
+- Añadido más detalle al placeholder del `VisionAgent`.
 
+## Commit 9: efc5f0b - feat: Enhance DiagnosisAgent analysis logic
+- Mejora de la lógica de análisis del `DiagnosisAgent`.
 
-## Commit 6: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.process_request` and example usage block.
-- Corrected global variable access within `process_request`.
+## Commit 10: e86d7ed - feat: Enhance VisionAgent functionality
+- Mejora de la funcionalidad del `VisionAgent`.
 
+## Commit 11: 770c24c - feat: Enhance VisionAgent functionality (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 7: feat: Implement /api/v1/metrics endpoint
-- Implemented the `/api/v1/metrics` endpoint in `src/core/api_handler.py` with simulated metrics.
+## Commit 12: be01f50 - feat: Enhance VisionAgent functionality (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
+## Commit 13: 60a9a92 - feat: Add OrchestrationEngine placeholder
+- Creación del placeholder para el `OrchestrationEngine`.
 
-## Commit 8: feat: Integrate basic feedback loop logic in Orchestration Engine
-- Implemented a simulated feedback loop in `_handle_plan_mode`.
-- Added placeholder `QAAgent` and `DebugAgent` for simulation.
-- Modified `_load_agents` to include the new agents.
+## Commit 14: f3e325c - feat: Add MCP Handler placeholder
+- Creación del placeholder para el `MCP Handler`.
 
-## Commit 9: feat: Implement full RESTful API endpoint for task creation
-- Integrated `api_handler.py` with `OrchestrationEngine`.
-- The `create_task` endpoint now calls `process_request` and returns a real task ID and status.
-- Removed simulated logic from the endpoint.
+## Commit 15: 0da147e - feat: Add OrchestrationEngine placeholder (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 10: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 16: f9fb201 - feat: Add OrchestrationEngine placeholder (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 11: chore: Move commit_log.md to docs/ and update gitignore
-- Moved `commit_log.md` to `docs/` and updated `.gitignore` to ignore `/plan` and `/plan/logs`.
+## Commit 17: cf863a0 - feat: Add OrchestrationEngine placeholder (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 12: refactor: Update commit log reference to docs/commit_log.md
-- Updated the reference to `commit_log.md` within the file itself.
+## Commit 18: 0daa0d4 - feat: Integrate core components in OrchestrationEngine
+- Integración de los componentes principales en el `OrchestrationEngine`.
 
-## Commit 13: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.py` related to indentation, statement separation, and global variable access.
+## Commit 19: d8c4032 - feat: Integrate core components in OrchestrationEngine (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 14: feat: Implement /api/v1/metrics endpoint
-- Implemented the `/api/v1/metrics` endpoint in `src/core/api_handler.py` with simulated metrics.
+## Commit 20: 4956be4 - feat: Integrate core components in OrchestrationEngine (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 15: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 21: 80f1b35 - feat: Integrate core components in OrchestrationEngine (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 16: feat: Add setter methods to OrchestrationEngine and correct component assignment
-- Added setter methods to `OrchestrationEngine` for `task_state_manager` and `load_balancer`.
-- Corrected component assignment in `initialize_core_components`.
+## Commit 22: 811e719 - feat: Implement OrchestrationEngine LLM interaction and task state updates
+- Implementación de la interacción del `OrchestrationEngine` con los LLM y actualizaciones de estado de tareas.
 
-## Commit 17: fix: Resolve NameError in OrchestrationEngine initialization
-- Fixed a `NameError` that occurred during the initialization of `OrchestrationEngine`.
+## Commit 23: c6892b7 - feat: Implement OrchestrationEngine LLM interaction and task state updates (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 18: fix: Correct OrchestrationEngine initialization and global variable scope
-- Corrected the initialization of `OrchestrationEngine` and the scope of global variables.
+## Commit 24: 6ed3c89 - feat: Implement OrchestrationEngine LLM interaction and task state updates (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 19: fix: Correct OrchestrationEngine instantiation and global variable handling
-- Corrected the instantiation of `OrchestrationEngine` and the handling of global variables.
+## Commit 25: 40e2ce0 - feat: Implement OrchestrationEngine LLM interaction and task state updates (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 20: feat: Add setter methods to OrchestrationEngine and correct component assignment
-- Added setter methods to `OrchestrationEngine` for `task_state_manager` and `load_balancer`.
-- Corrected component assignment in `initialize_core_components`.
+## Commit 26: 7e14cbf - feat: Implement OrchestrationEngine LLM interaction and task state updates (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 21: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 27: 841c434 - feat: Implement OrchestrationEngine LLM interaction and task state updates (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 22: feat: Implement full RESTful API endpoint for task creation
-- Integrated `api_handler.py` with `OrchestrationEngine`.
-- The `create_task` endpoint now calls `process_request` and returns a real task ID and status.
-- Removed simulated logic from the endpoint.
+## Commit 28: 7c3d120 - feat: Improve PlannerAgent create_plan method with basic task breakdown
+- Mejora del método `create_plan` del `PlannerAgent` con un desglose básico de tareas.
 
-## Commit 23: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 29: a3920e5 - feat: Refine DiagnosisAgent for development task classification
+- Refinamiento del `DiagnosisAgent` para la clasificación de tareas de desarrollo.
 
-## Commit 24: feat: Improve PlannerAgent create_plan method with basic task breakdown
-- Enhanced `PlannerAgent.create_plan` to provide a more structured plan.
+## Commit 30: b33a7b6 - refactor: Fix OrchestrationEngine initialization and enable ChatAgent loading
+- Corrección de la inicialización del `OrchestrationEngine` y activación de la carga del `ChatAgent`.
 
-## Commit 25: feat: Refine DiagnosisAgent for development task classification
-- Improved the `DiagnosisAgent`'s ability to classify development-related tasks.
+## Commit 31: ef526ef - fix: Resolve NameError in OrchestrationEngine initialization
+- Resolución de un `NameError` en la inicialización del `OrchestrationEngine`.
 
-## Commit 26: feat: Add placeholder VisionAgent implementation
-- Added a placeholder implementation for the `VisionAgent`.
+## Commit 32: 9021a2b - fix: Correct OrchestrationEngine initialization and global variable scope
+- Corrección de la inicialización del `OrchestrationEngine` y el alcance de las variables globales.
 
-## Commit 27: feat: Add OrchestrationEngine structure and agent routing logic
-- Implemented the basic structure of the `OrchestrationEngine` and its agent routing logic.
+## Commit 33: 252a2da - fix: Correct OrchestrationEngine instantiation and global variable handling
+- Corrección de la instanciación del `OrchestrationEngine` y el manejo de variables globales.
 
-## Commit 28: refactor: Fix OrchestrationEngine initialization and enable ChatAgent loading
-- Corrected the initialization of `OrchestrationEngine` and enabled the loading of `ChatAgent`.
+## Commit 34: 09f3615 - feat: Add setter methods to OrchestrationEngine and correct component assignment
+- Añadidos métodos setter al `OrchestrationEngine` y corregida la asignación de componentes.
 
-## Commit 29: fix: Resolve NameError in OrchestrationEngine initialization
-- Fixed a `NameError` that occurred during the initialization of `OrchestrationEngine`.
+## Commit 35: ef05710 - feat: Add setter methods to OrchestrationEngine and correct component assignment (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 30: fix: Correct OrchestrationEngine initialization and global variable scope
-- Corrected the initialization of `OrchestrationEngine` and the scope of global variables.
+## Commit 36: 843b6d0 - docs: Update commit log with OrchestrationEngine and agent details
+- Actualización del `commit_log.md` con detalles del `OrchestrationEngine` y la integración de agentes.
 
-## Commit 31: fix: Correct OrchestrationEngine instantiation and global variable handling
-- Corrected the instantiation of `OrchestrationEngine` and the handling of global variables.
+## Commit 37: 50a4c1b - fix: Correct OrchestrationEngine syntax errors and global variable access
+- Corrección de errores de sintaxis en el `OrchestrationEngine` y el acceso a variables globales.
 
-## Commit 32: feat: Add setter methods to OrchestrationEngine and correct component assignment
-- Added setter methods to `OrchestrationEngine` for `task_state_manager` and `load_balancer`.
-- Corrected component assignment in `initialize_core_components`.
+## Commit 38: dac33cd - feat: Implement /api/v1/metrics endpoint
+- Implementación del endpoint `/api/v1/metrics`.
 
-## Commit 33: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 39: 85f7637 - fix: Correct OrchestrationEngine syntax errors and global variable access (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 34: feat: Implement full RESTful API endpoint for task creation
-- Integrated `api_handler.py` with `OrchestrationEngine`.
-- The `create_task` endpoint now calls `process_request` and returns a real task ID and status.
-- Removed simulated logic from the endpoint.
+## Commit 40: 37c006d - fix: Correct OrchestrationEngine syntax errors and global variable access (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 35: docs: Update commit_log.md
-- Updated `commit_log.md` with the latest commits.
+## Commit 41: d2d22af - fix: Correct OrchestrationEngine syntax errors and global variable access (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 36: feat: Integrate basic feedback loop logic in Orchestration Engine
-- Implemented a simulated feedback loop in `_handle_plan_mode`.
-- Added placeholder `QAAgent` and `DebugAgent` for simulation.
-- Modified `_load_agents` to include the new agents.
+## Commit 42: 727ddb8 - chore: Add /plan and /plan/logs to .gitignore
+- Añadido `/plan` y `/plan/logs` al `.gitignore`.
 
-## Commit 37: feat: Implement /api/v1/metrics endpoint
-- Implemented the `/api/v1/metrics` endpoint in `src/core/api_handler.py` with simulated metrics.
+## Commit 43: 21695a8 - chore: Move commit_log.md to docs/ and update gitignore
+- Movido `commit_log.md` a `docs/` y actualizado el `.gitignore`.
 
-## Commit 38: refactor: Update commit log reference to docs/commit_log.md
-- Updated the reference to `commit_log.md` within the file itself.
+## Commit 44: 75667cd - refactor: Update commit log reference to docs/commit_log.md
+- Actualizada la referencia a `commit_log.md` dentro del propio archivo.
 
-## Commit 39: chore: Move commit_log.md to docs/ and update gitignore
-- Moved `commit_log.md` to `docs/` and updated `.gitignore` to ignore `/plan` and `/plan/logs`.
+## Commit 45: 08701cf - feat: Implement /api/v1/metrics endpoint (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 40: chore: Add /plan and /plan/logs to .gitignore
-- Added `/plan` and `/plan/logs` to `.gitignore`.
+## Commit 46: b3f407e - feat: Integrate basic feedback loop logic in Orchestration Engine
+- Integración de una lógica básica de bucle de feedback en el `OrchestrationEngine`.
 
-## Commit 41: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.py` related to indentation, statement separation, and global variable access.
+## Commit 47: b1363ce - docs: Update commit_log.md
+- Actualización del `commit_log.md`.
 
-## Commit 42: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.py` related to indentation, statement separation, and global variable access.
+## Commit 48: e65cd66 - feat: Implement full RESTful API endpoint for task creation
+- Implementación del endpoint RESTful completo para la creación de tareas.
 
-## Commit 43: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.py` related to indentation, statement separation, and global variable access.
+## Commit 49: 954c6aa - docs: Update commit_log.md (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 44: feat: Implement /api/v1/metrics endpoint
-- Implemented the `/api/v1/metrics` endpoint in `src/core/api_handler.py` with simulated metrics.
+## Commit 50: f7af8dc - docs: Update commit log with complete history
+- Actualización del `commit_log.md` con el historial completo.
 
-## Commit 45: fix: Correct OrchestrationEngine syntax errors and global variable access
-- Addressed Pylance errors in `OrchestrationEngine.py` related to indentation, statement separation, and global variable access.
+## Commit 51: ab3e86c - docs: Update commit log with complete history (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 46: docs: Update commit log with OrchestrationEngine and agent details
-- Added entries to `commit_log.md` for previous commits related to agents and OrchestrationEngine integration.
+## Commit 52: 050dc10 - docs: Update commit log with complete history (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 47: feat: Add setter methods to OrchestrationEngine and correct component assignment
-- Added setter methods to `OrchestrationEngine` for `task_state_manager` and `load_balancer`.
-- Corrected component assignment in `initialize_core_components`.
+## Commit 53: 9088e99 - chore: Allow tracking of plan files in .gitignore
+- Permitido el seguimiento de los archivos de plan en el `.gitignore`.
 
-## Commit 48: Initial commit: Cleaned project
-- Cleaned the project and removed unnecessary files.
+## Commit 54: 7c582a3 - chore: Revert .gitignore and remove plan_10.md from tracking
+- Revertido el `.gitignore` y eliminado `plan_10.md` del seguimiento.
 
-## Commit 49: Initial commit
-- Initial commit of the project.
+## Commit 55: 66b2bdc - chore: Revert .gitignore to ignore /plan directory
+- Revertido el `.gitignore` para ignorar el directorio `/plan`.
 
-## Commit 50: docs: Update commit log with complete history
-- Updated `commit_log.md` with the complete history of commits.
+## Commit 56: 9c7f6a4 - chore: Revert .gitignore to ignore /plan directory (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
 
-## Commit 51: feat: Enhance PlannerAgent create_plan method
-- Enhanced `PlannerAgent.create_plan` to provide a more structured plan with status tracking.
+## Commit 57: 89dd086 - docs: Document API endpoints
+- Documentación de los endpoints de la API.
 
-## Commit 52: feat: Implement DiagnosisAgent analysis logic
-- Implemented the `analyze_request` method in `DiagnosisAgent` with enhanced keyword-based analysis.
-- Added `classify_intent`, `determine_operational_mode`, and `determine_target_profile_and_role` helper methods.
+## Commit 58: d015aff - config: Create configuration.json for LLM engines and profiles
+- Creación de `configuration.json` para los motores LLM y perfiles.
 
-TEST
+## Commit 59: bedd084 - docs: Update commit log with complete history (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
+
+## Commit 60: d8af241 - docs: Document load balancer rules
+- Documentación de las reglas del balanceador de carga.
+
+## Commit 61: 180825e - feat: Enhance PlannerAgent create_plan method
+- Mejora del método `create_plan` del `PlannerAgent`.
+
+## Commit 62: 1201509 - feat: Implement DiagnosisAgent analysis logic
+- Implementación de la lógica de análisis del `DiagnosisAgent`.
+
+## Commit 63: a2fefee - test
+- Commit de prueba.
+
+## Commit 64: 01d271d - test (duplicado)
+- Commit duplicado, se recomienda revisar y limpiar el historial.
+
+## Commit 65: 721fe43 - refactor: Enhance PlannerAgent with detailed planning and execution
+- Refactorización del `PlannerAgent` con planificación y ejecución detallada.
+
+## Commit 66: f242a86 - refactor: Simplify OrchestrationEngine's plan mode
+- Simplificación del modo de planificación del `OrchestrationEngine`.
+
+## Commit 67: 88d1f02 - refactor: Improve application startup and orchestration engine initialization
+- Mejora del arranque de la aplicación y la inicialización del `OrchestrationEngine`.
