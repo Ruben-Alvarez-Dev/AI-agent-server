@@ -286,3 +286,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 
 ## Commit 95: 3c8b274 - feat: Integrate TeacherAgent into OrchestrationEngine
 - Integración del `TeacherAgent` en el `OrchestrationEngine`.
+
+## Commit 96: b97b03a - docs: Update commit_log.md with latest commits
+- Actualización del `commit_log.md` con los últimos commits.
+
+## Commit 97: 5444b08 - feat: Add initial structure for EmailManagementAgent
+- Creación de la estructura inicial para el `EmailManagementAgent`.
+
+## Commit 98: 748689f - feat: Integrate EmailManagementAgent into OrchestrationEngine
+- Integración del `EmailManagementAgent` en el `OrchestrationEngine`.
