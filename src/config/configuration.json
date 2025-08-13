@@ -1,0 +1,35 @@
+{
+  "llm_engines": {
+    "ollama_llama3": {
+      "source": "local",
+      "locked": false,
+      "toggle": true,
+      "model": "llama3"
+    },
+    "openai_gpt4": {
+      "source": "api",
+      "locked": true,
+      "toggle": true,
+      "model": "gpt-4-turbo"
+    }
+  },
+  "profiles": {
+    "Developer": {
+      "roles": ["Diagnosis-Agent", "Planner-Agent", "Fast-Coder-Agent", "Deep-Coder-Agent", "QA-Agent", "Vision-Agent", "Debug-Agent", "Research-Agent"]
+    },
+    "Productivity": {
+      "roles": ["Financial-Agent", "Planner-Agent", "Writing-Agent", "Teacher-Agent", "Chat-Agent"]
+    },
+    "General": {
+      "roles": ["Chat-Agent"]
+    }
+  },
+  "load_balancer_rules": {
+    "default_engine": "ollama_llama3",
+    "rules": [
+      {"condition": "prompt.contains('code')", "engine": "ollama_llama3"},
+      {"condition": "prompt.contains('summarize')", "engine": "openai_gpt4"},
+      {"condition": "prompt.contains('weather')", "engine": "openai_gpt4"}
+    ]
+  }
+}
