@@ -80,6 +80,12 @@ class OrchestrationEngine:
         except ImportError:
             print("WritingAgent not found.")
         
+        try:
+            agents['Fast-Coder-Agent'] = FastCoderAgent(self)
+            print("FastCoderAgent loaded.")
+        except ImportError:
+            print("FastCoderAgent not found.")
+        
         # ... Load other agents similarly, passing `self` (the orchestration_engine instance)
         # Example:
         # try:

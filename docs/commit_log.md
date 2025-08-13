@@ -375,7 +375,11 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 ## Commit 120: fc46146 - feat: Create BaseAgent class
 - Creación de la clase base abstracta `BaseAgent` en `src/agents/base_agent.py` para estandarizar la interfaz de todos los agentes.
 
-## Commit 121: XXX - feat: Implement WritingAgent logic
+## Commit 121: 3842e59 - feat: Implement WritingAgent logic
 - Implementación de la lógica real en `WritingAgent`, heredando de `BaseAgent`.
 - El agente ahora selecciona un LLM a través del `LoadBalancer` y publica su resultado en el canal de feedback de MCP.
 - Refactorización del `OrchestrationEngine` para cargar y despachar tareas a los agentes reales de forma asíncrona.
+
+## Commit 122: XXX - feat: Implement FastCoderAgent logic
+- Implementación de la lógica real en `FastCoderAgent`, heredando de `BaseAgent`.
+- Integración del `FastCoderAgent` en el `OrchestrationEngine`.
