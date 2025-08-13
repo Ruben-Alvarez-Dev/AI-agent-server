@@ -50,8 +50,8 @@ class OrchestrationEngine:
         # Initialize LLM Engines
         self.llm_engines = self._initialize_llm_engines()
 
-        # Configure the load balancer with the initialized engines
-        self._configure_load_balancer()
+        # The LoadBalancer now loads its own configuration.
+        # self._configure_load_balancer()
 
         # Connect to MCP and start consuming
         self._initialize_mcp()
@@ -205,15 +205,16 @@ class OrchestrationEngine:
             print(f"Could not initialize OpenAIEngine: {e}")
         return engines
 
-    def _configure_load_balancer(self):
-        """Configures the load balancer with available LLM engines."""
-        if self.load_balancer:
-            engine_configs = {
-                "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
-                "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
-            }
-            self.load_balancer.configure_engines(engine_configs)
-            print("LoadBalancer configured.")
+    # This method is no longer needed as the LoadBalancer self-configures.
+    # def _configure_load_balancer(self):
+    #     """Configures the load balancer with available LLM engines."""
+    #     if self.load_balancer:
+    #         engine_configs = {
+    #             "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
+    #             "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
+    #         }
+    #         self.load_balancer.configure_engines(engine_configs)
+    #         print("LoadBalancer configured.")
 
     def _initialize_mcp(self):
         """Initializes the MCP handler, connects, and subscribes to channels."""
