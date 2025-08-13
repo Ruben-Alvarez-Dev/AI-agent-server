@@ -10,6 +10,7 @@ from src.agents.developer.planner_agent import PlannerAgent
 from src.agents.developer.vision_agent import VisionAgent
 from src.agents.developer.fast_coder_agent import FastCoderAgent
 from src.agents.developer.architect_agent import ArchitectAgent
+from src.agents.developer.deep_coder_agent import DeepCoderAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -72,6 +73,12 @@ class OrchestrationEngine:
             print("ArchitectAgent loaded.")
         except ImportError:
             print("ArchitectAgent not found.")
+
+        try:
+            agents['deep_coder'] = DeepCoderAgent()
+            print("DeepCoderAgent loaded.")
+        except ImportError:
+            print("DeepCoderAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
