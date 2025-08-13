@@ -26,14 +26,14 @@ class TaskResponse(BaseModel):
 
 class MetricsResponse(BaseModel):
     server_status: str
-    llm_status: dict
-    tokens_per_second: float | None = None
-    average_response_time: float | None = None
+    uptime_seconds: float
     total_requests: int
+    successful_requests: int
+    failed_requests: int
     active_tasks: int
-    queue_length: int
-    success_rate: float | None = None
-    api_costs: float | None = None
+    average_response_time_ms: float
+    success_rate: float
+    llm_status: dict
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -96,19 +96,11 @@ def create_app():
         if not orchestration_engine:
             raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
 
-        # Simulated metrics
-        metrics_data = {
-            "server_status": "online",
-            "llm_status": {},
-            "tokens_per_second": 150.5,
-            "average_response_time": 0.85,
-            "total_requests": 1500,
-            "active_tasks": 5,
-            "queue_length": 2,
-            "success_rate": 0.92,
-            "api_costs": 0.05
-        }
-
+        # Get real metrics from the collector
+        metrics_data = orchestration_engine.metrics_collector.get_metrics()
+        
+        # Add LLM engine status
+        metrics_data["llm_status"] = {}
         if orchestration_engine.llm_engines.get('ollama'):
             metrics_data["llm_status"]["OllamaEngine"] = "active"
         if orchestration_engine.llm_engines.get('openai') and orchestration_engine.llm_engines['openai'].api_key:

@@ -347,7 +347,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - Modificación del `APIHandler` para publicar tareas en la cola en lugar de procesarlas directamente.
 - Añadido el manejo del ciclo de vida de la conexión RabbitMQ en el arranque y parada de la aplicación.
 
-## Commit 115: XXX - feat: Implement rule-based logic in LoadBalancer
+## Commit 115: 62f808f - feat: Implement rule-based logic in LoadBalancer
 - Implementación de la lógica de selección de LLM basada en reglas en el `LoadBalancer`.
 - El `LoadBalancer` ahora carga su configuración y reglas desde `src/config/configuration.json`.
 - Refactorización del `OrchestrationEngine` para eliminar la configuración manual del `LoadBalancer`.
+
+## Commit 116: XXX - feat: Implement real-time metrics collection
+- Creación del `MetricsCollector` para registrar métricas en tiempo real (peticiones, tareas activas, etc.).
+- Integración del `MetricsCollector` en el `OrchestrationEngine` para actualizar las métricas durante el ciclo de vida de las tareas.
+- Modificación del endpoint `/api/v1/metrics` en `APIHandler` para devolver las métricas reales del `MetricsCollector`.

@@ -30,6 +30,8 @@ from src.load_balancer.load_balancer import LoadBalancer
 from src.llm_engines.local.ollama_engine import OllamaEngine
 from src.llm_engines.api.openai_engine import OpenAIEngine
 from src.core.mcp_handler import MCPHandler
+from src.core.metrics_collector import MetricsCollector
+import time
 
 class OrchestrationEngine:
     def __init__(self):
@@ -42,6 +44,7 @@ class OrchestrationEngine:
         self.task_state_manager = TaskStateManager()
         self.load_balancer = LoadBalancer()
         self.mcp_handler = MCPHandler()
+        self.metrics_collector = MetricsCollector()
         
         # Load agents
         self.agents = self._load_agents()
@@ -230,11 +233,13 @@ class OrchestrationEngine:
         """
         Receives a user request and publishes it to the inbound task queue.
         """
+        self.metrics_collector.increment_total_requests()
         task_id = str(uuid.uuid4())
         task_message = {
             "task_id": task_id,
             "prompt": user_prompt,
-            "status": "Received"
+            "status": "Received",
+            "start_time": time.time()
         }
         self.mcp_handler.publish_message('ai-agent-server.tasks.inbound', task_message)
         print(f"Task {task_id} published to inbound queue.")
@@ -248,6 +253,9 @@ class OrchestrationEngine:
             task_data = json.loads(message_body.decode('utf-8'))
             task_id = task_data.get("task_id")
             user_prompt = task_data.get("prompt")
+            start_time = task_data.get("start_time")
+            
+            self.metrics_collector.task_started()
             print(f"Orchestration Engine received task from MCP: '{user_prompt}' (ID: {task_id})")
 
             if not self.diagnosis_agent:
@@ -285,11 +293,21 @@ class OrchestrationEngine:
                 error_msg = f"Unknown operational mode: {operational_mode}"
                 print(error_msg)
                 self.task_state_manager.fail_task(task_id, error_message=error_msg)
+                self.metrics_collector.increment_failed_requests()
+
+            if start_time:
+                end_time = time.time()
+                self.metrics_collector.add_response_time(end_time - start_time)
+            self.metrics_collector.task_finished()
 
         except json.JSONDecodeError:
             print("Error decoding JSON message from MCP.")
+            self.metrics_collector.increment_failed_requests()
+            self.metrics_collector.task_finished()
         except Exception as e:
             print(f"Error handling MCP task: {e}")
+            self.metrics_collector.increment_failed_requests()
+            self.metrics_collector.task_finished()
 
     def _handle_chat_mode(self, task_id: str, prompt: str):
         """Handles requests in Chat mode."""
@@ -298,10 +316,12 @@ class OrchestrationEngine:
             response = chat_agent.process_message(prompt)
             print(f"Chat Agent response: {response}")
             self.task_state_manager.complete_task(task_id, final_result=response)
+            self.metrics_collector.increment_successful_requests()
         else:
             error_msg = "Chat Agent not available."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            self.metrics_collector.increment_failed_requests()
 
     def _handle_agent_mode(self, task_id: str, prompt: str, target_role: str):
         """Handles requests in Agent mode."""
@@ -312,6 +332,7 @@ class OrchestrationEngine:
             error_msg = f"Agent '{target_role}' not found."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            self.metrics_collector.increment_failed_requests()
             return
 
         if hasattr(agent_instance, 'generate_response'):
@@ -322,14 +343,17 @@ class OrchestrationEngine:
                 response = llm_engine.generate_response(prompt)
                 print(f"LLM Engine response: {response}")
                 self.task_state_manager.complete_task(task_id, final_result=response)
+                self.metrics_collector.increment_successful_requests()
             else:
                 error_msg = "No suitable LLM engine found."
                 print(error_msg)
                 self.task_state_manager.fail_task(task_id, error_message=error_msg)
+                self.metrics_collector.increment_failed_requests()
         else:
             error_msg = f"Agent '{target_role}' does not have a 'generate_response' method."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            self.metrics_collector.increment_failed_requests()
 
     def _handle_plan_mode(self, task_id: str, prompt: str, analysis: dict):
         """
@@ -342,6 +366,7 @@ class OrchestrationEngine:
             error_msg = "PlannerAgent not available for Plan mode."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            self.metrics_collector.increment_failed_requests()
             return
 
         # 1. Create a plan using the PlannerAgent
@@ -354,11 +379,13 @@ class OrchestrationEngine:
             self.task_state_manager.update_task_state(task_id, new_status="Planned", new_payload={"plan": plan})
             self.task_state_manager.add_history(task_id, "Plan Created", {"plan_length": len(plan)})
             print(f"Task {task_id} has been planned. Execution can now begin.")
+            self.metrics_collector.increment_successful_requests()
 
         except Exception as e:
             error_msg = f"An error occurred during planning: {e}"
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            self.metrics_collector.increment_failed_requests()
 
 
 # Example of how the Orchestration Engine might be initialized and used:
