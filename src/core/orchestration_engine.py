@@ -75,7 +75,7 @@ class OrchestrationEngine:
                     response = agents['chat'].process_message(user_prompt) # Assuming ChatAgent has process_message
                     print(f"Chat Agent response: {response}")
                     if self.task_state_manager and task_id: # Use self.task_state_manager
-                        self.task_state_manager.update_task_state(task_id, new_status="Completed", final_result=response, event_description="Responded via Chat-Agent.")
+                        self.task_state_manager.update_task_state(task_id, new_status="Completed", result=response, event_description="Responded via Chat-Agent.")
                 else:
                     print("Chat Agent not available.")
                     if self.task_state_manager and task_id: # Use self.task_state_manager
