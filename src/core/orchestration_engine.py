@@ -16,102 +16,7 @@ diagnosis_agent = None
 ollama_engine = None # Placeholder for OllamaEngine
 openai_engine = None # Placeholder for OpenAIEngine
 
-def load_agents():
-    """
-    Loads available agents and makes them accessible.
-    This would typically involve importing and instantiating agents.
-    """
-    global agents
-    print("Loading agents...")
-    try:
-        from src.agents.developer.diagnosis_agent import DiagnosisAgent
-        agents['diagnosis'] = DiagnosisAgent()
-        print("DiagnosisAgent loaded.")
-    except ImportError:
-        print("DiagnosisAgent not found.")
-
-    try:
-        from src.agents.developer.planner_agent import PlannerAgent
-        agents['planner'] = PlannerAgent()
-        print("PlannerAgent loaded.")
-    except ImportError:
-        print("PlannerAgent not found.")
-
-    try:
-        from src.agents.developer.vision_agent import VisionAgent
-        agents['vision'] = VisionAgent()
-        print("VisionAgent loaded.")
-    except ImportError:
-        print("VisionAgent not found.")
-
-    # Load other agents as needed...
-    # Example: If a ChatAgent exists
-    # try:
-    #     from src.agents.general.chat_agent import ChatAgent
-    #     agents['chat'] = ChatAgent()
-    #     print("ChatAgent loaded.")
-    # except ImportError:
-    #     print("ChatAgent not found.")
-
-def initialize_core_components():
-    """Initializes core components like OrchestrationEngine and loads agents."""
-    global task_state_manager, load_balancer, diagnosis_agent, orchestration_engine, ollama_engine, openai_engine
-
-    if orchestration_engine is None:
-        from src.core.orchestration_engine import OrchestrationEngine
-        orchestration_engine = OrchestrationEngine()
-        
-        # Initialize and set TaskStateManager
-        from src.tasks_state.task_state_manager import TaskStateManager
-        task_state_manager = TaskStateManager()
-        orchestration_engine.set_task_state_manager(task_state_manager)
-        print("TaskStateManager initialized and set.")
-
-        # Initialize and set LoadBalancer
-        from src.load_balancer.load_balancer import LoadBalancer
-        load_balancer = LoadBalancer()
-        # Configure load balancer with dummy data for now, or load from config
-        dummy_engines_config = {
-            "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
-            "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
-        }
-        load_balancer.configure_engines(dummy_engines_config)
-        orchestration_engine.set_load_balancer(load_balancer)
-        print("LoadBalancer initialized and set.")
-
-        # Load agents and set DiagnosisAgent
-        load_agents()
-        if 'diagnosis' in agents:
-            orchestration_engine.diagnosis_agent = agents['diagnosis']
-            print("DiagnosisAgent set for OrchestrationEngine.")
-        else:
-            print("DiagnosisAgent not available to set for OrchestrationEngine.")
-        
-        # Initialize LLM Engines
-        try:
-            from src.llm_engines.local.ollama_engine import OllamaEngine
-            ollama_engine = OllamaEngine()
-            ollama_engine.connect() # Connect to local Ollama
-            print("OllamaEngine initialized and connected.")
-        except ImportError:
-            print("OllamaEngine not found.")
-        
-        try:
-            from src.llm_engines.api.openai_engine import OpenAIEngine
-            openai_engine = OpenAIEngine()
-            # OpenAI engine initialization relies on API key being set in env vars
-            if openai_engine.api_key:
-                print("OpenAI Engine initialized.")
-            else:
-                print("OpenAI Engine initialized but API key not set.")
-        except ImportError:
-            print("OpenAI Engine not found.")
-
-        print("Core components initialized.")
-
-# Initialize components on startup
-initialize_core_components()
-
+# --- OrchestrationEngine Class Definition ---
 class OrchestrationEngine:
     def __init__(self):
         # Agents, task_state_manager, load_balancer, diagnosis_agent, and LLM engines are managed globally or passed in
@@ -233,6 +138,104 @@ class OrchestrationEngine:
                 if task_state_manager and task_id:
                     task_state_manager.fail_task(task_id, error_message="Low confidence analysis, Chat Agent not available.")
 
+# --- Agent Loading Function ---
+def load_agents():
+    """
+    Loads available agents and makes them accessible.
+    This would typically involve importing and instantiating agents.
+    """
+    global agents
+    print("Loading agents...")
+    try:
+        from src.agents.developer.diagnosis_agent import DiagnosisAgent
+        agents['diagnosis'] = DiagnosisAgent()
+        print("DiagnosisAgent loaded.")
+    except ImportError:
+        print("DiagnosisAgent not found.")
+
+    try:
+        from src.agents.developer.planner_agent import PlannerAgent
+        agents['planner'] = PlannerAgent()
+        print("PlannerAgent loaded.")
+    except ImportError:
+        print("PlannerAgent not found.")
+
+    try:
+        from src.agents.developer.vision_agent import VisionAgent
+        agents['vision'] = VisionAgent()
+        print("VisionAgent loaded.")
+    except ImportError:
+        print("VisionAgent not found.")
+
+    # Load other agents as needed...
+    # Example: If a ChatAgent exists
+    try:
+        from src.agents.general.chat_agent import ChatAgent
+        agents['chat'] = ChatAgent()
+        print("ChatAgent loaded.")
+    except ImportError:
+        print("ChatAgent not found.")
+
+# --- Initialization Function ---
+def initialize_core_components():
+    """Initializes core components like OrchestrationEngine and loads agents."""
+    global task_state_manager, load_balancer, diagnosis_agent, orchestration_engine, ollama_engine, openai_engine
+
+    # Ensure OrchestrationEngine is instantiated only once
+    if orchestration_engine is None:
+        orchestration_engine = OrchestrationEngine() # Instantiate the class defined above
+        
+        # Initialize and set TaskStateManager
+        from src.tasks_state.task_state_manager import TaskStateManager
+        task_state_manager = TaskStateManager()
+        orchestration_engine.set_task_state_manager(task_state_manager)
+        print("TaskStateManager initialized and set.")
+
+        # Initialize and set LoadBalancer
+        from src.load_balancer.load_balancer import LoadBalancer
+        load_balancer = LoadBalancer()
+        # Configure load balancer with dummy data for now, or load from config
+        dummy_engines_config = {
+            "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
+            "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
+        }
+        load_balancer.configure_engines(dummy_engines_config)
+        orchestration_engine.set_load_balancer(load_balancer)
+        print("LoadBalancer initialized and set.")
+
+        # Load agents and set DiagnosisAgent
+        load_agents()
+        if 'diagnosis' in agents:
+            orchestration_engine.diagnosis_agent = agents['diagnosis']
+            print("DiagnosisAgent set for OrchestrationEngine.")
+        else:
+            print("DiagnosisAgent not available to set for OrchestrationEngine.")
+        
+        # Initialize LLM Engines
+        try:
+            from src.llm_engines.local.ollama_engine import OllamaEngine
+            ollama_engine = OllamaEngine()
+            ollama_engine.connect() # Connect to local Ollama
+            print("OllamaEngine initialized and connected.")
+        except ImportError:
+            print("OllamaEngine not found.")
+        
+        try:
+            from src.llm_engines.api.openai_engine import OpenAIEngine
+            openai_engine = OpenAIEngine()
+            # OpenAI engine initialization relies on API key being set in env vars
+            if openai_engine.api_key:
+                print("OpenAI Engine initialized.")
+            else:
+                print("OpenAI Engine initialized but API key not set.")
+        except ImportError:
+            print("OpenAI Engine not found.")
+
+        print("Core components initialized.")
+
+# Initialize components on startup
+initialize_core_components()
+
 # Example of how the Orchestration Engine might be initialized and used:
 # if __name__ == "__main__":
 #     # Note: The initialization logic is now handled by initialize_core_components() called at the module level.
@@ -247,189 +250,3 @@ class OrchestrationEngine:
 #     orchestration_engine.process_request("What is the weather like today?")
 #     orchestration_engine.process_request("Research the latest advancements in AI.")
 #     orchestration_engine.process_request("This is an unknown query.")
-</final_file_content>
-
-IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
-
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:38:51 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-294.755 / 1000K tokens used (29%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:38:51 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-294.755 / 1000K tokens used (29%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:39:54 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-342.105 / 1000K tokens used (34%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:40:20 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-353.734 / 1000K tokens used (35%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:40:48 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-371.073 / 1000K tokens used (37%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:41:44 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-408.821 / 1000K tokens used (41%)
-
-# Current Mode
-ACT MODE
-</environment_details>
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:41:57 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-413.683 / 1000K tokens used (41%)
-
-# Current Mode
-ACT MODE
-</environment_details>
