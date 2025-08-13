@@ -384,6 +384,53 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - Implementación de la lógica real en `FastCoderAgent`, heredando de `BaseAgent`.
 - Integración del `FastCoderAgent` en el `OrchestrationEngine`.
 
-## Commit 123: XXX - feat: Implement PlannerAgent logic
+## Commit 123: 376aa0a - feat: Implement PlannerAgent logic
 - Implementación de la lógica real en `PlannerAgent`, heredando de `BaseAgent`.
 - Integración del `PlannerAgent` en el `OrchestrationEngine`.
+
+## Commit 124: 1024e74 - feat: Implement VisionAgent logic
+- Implementación de la lógica real en `VisionAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona el modelo `moondream` a través del `LoadBalancer` y simula la descripción de una imagen.
+- Publica el resultado o error en el canal de feedback de MCP.
+
+## Commit 125: 3842e59 - feat: Implement WritingAgent logic
+- Implementación de la lógica real en `WritingAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona un LLM a través del `LoadBalancer` y publica su resultado en el canal de feedback de MCP.
+- Refactorización del `OrchestrationEngine` para cargar y despachar tareas a los agentes reales de forma asíncrona.
+
+## Commit 126: 8e041a8 - feat: Implement FastCoderAgent logic
+- Implementación de la lógica real en `FastCoderAgent`, heredando de `BaseAgent`.
+- Integración del `FastCoderAgent` en el `OrchestrationEngine`.
+
+## Commit 127: 376aa0a - feat: Implement PlannerAgent logic
+- Implementación de la lógica real en `PlannerAgent`, heredando de `BaseAgent`.
+- Integración del `PlannerAgent` en el `OrchestrationEngine`.
+
+## Commit 128: XXX - feat: Implement VisionAgent logic
+- Implementación de la lógica real en `VisionAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona el modelo `moondream` a través del `LoadBalancer` y simula la descripción de una imagen.
+- Publica el resultado o error en el canal de feedback de MCP.
+
+## Commit 129: XXX - feat: Implement PlannerAgent logic
+- Implementación de la lógica real en `PlannerAgent`, heredando de `BaseAgent`.
+- Integración del `PlannerAgent` en el `OrchestrationEngine`.
+
+## Commit 130: XXX - feat: Implement VisionAgent logic
+- Implementación de la lógica real en `VisionAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona el modelo `moondream` a través del `LoadBalancer` y simula la descripción de una imagen.
+- Publica el resultado o error en el canal de feedback de MCP.
+
+## Commit 131: XXX - feat: Implement PlannerAgent logic
+- Implementación de la lógica real en `PlannerAgent`, heredando de `BaseAgent`.
+- Integración del `PlannerAgent` en el `OrchestrationEngine`.
+
+## Commit 132: XXX - feat: Implement VisionAgent logic
+- Implementación de la lógica real en `VisionAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona el modelo `moondream` a través del `LoadBalancer` y simula la descripción de una imagen.
+- Publica el resultado o error en el canal de feedback de MCP.
+
+## Commit 133: XXX - feat: Implement ArchitectAgent logic
+- Implementación de la lógica real en `ArchitectAgent`, heredando de `BaseAgent`.
+- El agente ahora utiliza el `LoadBalancer` para seleccionar un modelo adecuado (ej. `phi3:mini` o `gemma:2b`) para generar planes arquitectónicos.
+- Publica el plan o un error en el canal de feedback de MCP.
+- Refactorización del `OrchestrationEngine` para cargar el `ArchitectAgent`.
