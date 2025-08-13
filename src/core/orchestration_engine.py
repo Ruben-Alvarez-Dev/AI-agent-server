@@ -88,11 +88,11 @@ class OrchestrationEngine:
         
         # ... Load other agents similarly, passing `self` (the orchestration_engine instance)
         # Example:
-        # try:
-        #     agents['Planner-Agent'] = PlannerAgent(self)
-        #     print("PlannerAgent loaded.")
-        # except ImportError:
-        #     print("PlannerAgent not found.")
+        try:
+            agents['Planner-Agent'] = PlannerAgent(self)
+            print("PlannerAgent loaded.")
+        except ImportError:
+            print("PlannerAgent not found.")
 
         # For now, we only load the Diagnosis and Writing agents.
         self.diagnosis_agent = agents.get('Diagnosis-Agent')

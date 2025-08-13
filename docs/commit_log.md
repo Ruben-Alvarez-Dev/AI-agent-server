@@ -380,6 +380,10 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - El agente ahora selecciona un LLM a través del `LoadBalancer` y publica su resultado en el canal de feedback de MCP.
 - Refactorización del `OrchestrationEngine` para cargar y despachar tareas a los agentes reales de forma asíncrona.
 
-## Commit 122: XXX - feat: Implement FastCoderAgent logic
+## Commit 122: 8e041a8 - feat: Implement FastCoderAgent logic
 - Implementación de la lógica real en `FastCoderAgent`, heredando de `BaseAgent`.
 - Integración del `FastCoderAgent` en el `OrchestrationEngine`.
+
+## Commit 123: XXX - feat: Implement PlannerAgent logic
+- Implementación de la lógica real en `PlannerAgent`, heredando de `BaseAgent`.
+- Integración del `PlannerAgent` en el `OrchestrationEngine`.
