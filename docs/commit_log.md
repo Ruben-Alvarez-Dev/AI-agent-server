@@ -33,4 +33,7 @@
 - Implemented the `/api/v1/metrics` endpoint in `src/core/api_handler.py` with simulated metrics.
 
 
-
+## Commit 8: feat: Integrate basic feedback loop logic in Orchestration Engine
+- Implemented a simulated feedback loop in `_handle_plan_mode`.
+- Added placeholder `QAAgent` and `DebugAgent` for simulation.
+- Modified `_load_agents` to include the new agents.
