@@ -357,7 +357,10 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - Integración del `MetricsCollector` en el `OrchestrationEngine` para actualizar las métricas durante el ciclo de vida de las tareas.
 - Modificación del endpoint `/api/v1/metrics` en `APIHandler` para devolver las métricas reales del `MetricsCollector`.
 
-## Commit 117: XXX - feat: Implement full feedback loop via MCP
+## Commit 117: 1024e74 - feat: Implement full feedback loop via MCP
 - El `OrchestrationEngine` ahora se suscribe al canal de feedback `ai-agent-server.tasks.feedback`.
 - Creación del método `handle_feedback_message` para procesar los mensajes de los agentes.
 - Simulación del envío de feedback por parte de los agentes en el `_handle_agent_mode` para probar el bucle.
+
+## Commit 118: XXX - docs: Create system architecture document
+- Creación del documento `doc/architecture.md` que detalla la arquitectura del sistema, los componentes principales y el flujo de comunicación.

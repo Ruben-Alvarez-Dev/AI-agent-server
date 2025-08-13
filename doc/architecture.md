@@ -1,14 +1,83 @@
-# Arquitectura Conceptual del LLM-Server
+# System Architecture
 
-El LLM-Server se compone de varios módulos interconectados, cada uno con una responsabilidad clara y definida [7, 13]. Esta arquitectura modular es fundamental para la flexibilidad y escalabilidad del sistema.
+This document provides a high-level overview of the AI Agent Server's architecture, its core components, and the communication flow.
 
-*   **Orquestador de LLMs / Orchestration Engine:** Se considera el **corazón del sistema** y el "cerebro" de la aplicación [7, 13-15]. Su función principal es gestionar y enrutar las peticiones a los LLMs apropiados [7, 13]. No ejecuta las tareas directamente, sino que se encarga de gestionarlas, delegarlas y supervisarlas [13, 15]. Se ubicará en `src/core/orchestration_engine.py`.
+## 1. Core Philosophy
 
-*   **Gestión de Perfiles, Roles y Funciones:** Este componente define la especialización y capacidades de los agentes dentro del sistema.
-    *   **Perfiles:** Son agrupaciones de roles diseñadas para tareas específicas, como **Developer**, **Productivity**, y **General** (para funcionalidades más amplias como Chat-Agent) [4, 6-11, 13].
-    *   **Roles:** Representan especializaciones de los agentes dentro de un perfil (por ejemplo, **Planner-Agent**, **Fast-Coder-Agent**) [6-8, 10, 11, 13]. Un LLM puede asumir uno o más roles, lo que le otorga flexibilidad en sus capacidades.
-    *   **Funciones:** Son capacidades reutilizables que pueden ser utilizadas por múltiples roles (ej. resumen, generación de código) [3, 6-8, 11, 13]. Se busca que sean "componentizables y reutilizables", promoviendo la versatilidad y eficiencia en todo el sistema [6, 8, 11, 13].
+The system is designed to be a modular, scalable, and asynchronous server capable of handling various tasks by routing them to specialized AI agents. The architecture prioritizes decoupling of components to allow for independent development, scaling, and maintenance.
 
-*   **LLM Engines:** Son los controladores específicos para los diferentes motores de LLM [12, 13, 16-18]. Se separan en interfaces para modelos **locales** (como llama.cpp, ollama) y **externos** (mediante APIs como OpenAI o Gemini) [12, 13, 16-18]. El Balanceador de Carga interactuará directamente con estos módulos de motor, no con los LLMs de forma directa [13, 16]. La estructura de directorios incluirá `src/llm_engines/` con subdirectorios `local/` y `api/`.
+## 2. High-Level Diagram
 
-*   **Balanceador de Carga (Load Balancer):** Este es un módulo clave que implementará la lógica de selección de LLMs [13, 16]. Consultará la configuración del sistema (inicialmente en un archivo JSON) y utilizará propiedades como `source` (local o API), `locked` (para inhabilitar el uso de un LLM) y `toggle` (para activar o desactivar un LLM) para tomar decisiones informadas y distribuir las tareas entre los motores más adecuados [13, 16, 19-21]. La lógica de las reglas del balanceador se documentará en un archivo Markdown (`load_balancer_rules.md`) dentro de `src/config/` para mayor claridad y mantenimiento [13, 16, 22, 23]. Este módulo estará ubicado en `src/load_balancer/load_balancer.py`.
+```
++-----------------+      +---------------------+      +------------------------+
+|   API Handler   |----->|     MCP Broker      |<-----|   Orchestration Engine |
+| (FastAPI)       |      | (RabbitMQ)          |      | (Core Logic)           |
++-----------------+      +---------------------+      +------------------------+
+      ^ (HTTP)                 |       ^                      |
+      |                        | (Consume)                    | (Publish Feedback)
+      |                        v                              v
++-----------------+      +---------------------+      +------------------------+
+| External Client |      | Inbound Task Queue  |      |   Feedback Task Queue  |
++-----------------+      +---------------------+      +------------------------+
+                                                                ^
+                                                                | (Agent Results)
+                                                          +-----------+
+                                                          |  Agents   |
+                                                          +-----------+
+```
+
+## 3. Core Components
+
+### 3.1. API Handler (`src/core/api_handler.py`)
+- **Framework:** FastAPI.
+- **Responsibility:** Exposes the external RESTful API to clients.
+- **Endpoints:**
+    - `POST /api/v1/tasks`: Receives new task requests from clients. It validates the request and immediately publishes it to the `inbound` task queue via the MCP Broker. It returns a `task_id` for asynchronous tracking.
+    - `GET /api/v1/metrics`: Retrieves and exposes real-time performance metrics from the `MetricsCollector`.
+
+### 3.2. MCP Handler (`src/core/mcp_handler.py`)
+- **Technology:** RabbitMQ (using the `pika` library).
+- **Responsibility:** Manages all asynchronous communication between the system's internal components. It abstracts the logic for connecting, publishing, and subscribing to message queues.
+- **Key Queues:**
+    - `ai-agent-server.tasks.inbound`: For new tasks published by the `API Handler`.
+    - `ai-agent-server.tasks.feedback`: For agents to publish their results, progress, or errors.
+
+### 3.3. Orchestration Engine (`src/core/orchestration_engine.py`)
+- **Responsibility:** The central brain of the system. It orchestrates the entire lifecycle of a task.
+- **Workflow:**
+    1.  Subscribes to the `inbound` task queue.
+    2.  Upon receiving a task, it uses the `DiagnosisAgent` to analyze the prompt and determine the required profile and agent.
+    3.  It creates and manages the task's state using the `TaskStateManager`.
+    4.  It dispatches the task to the appropriate agent (currently simulated by publishing to the feedback queue).
+    5.  It subscribes to the `feedback` queue to listen for results from agents.
+    6.  Upon receiving feedback, it updates the task's final state.
+    7.  It continuously updates the `MetricsCollector` throughout the task lifecycle.
+
+### 3.4. Load Balancer (`src/load_balancer/load_balancer.py`)
+- **Responsibility:** Selects the most appropriate LLM engine for a given task.
+- **Logic:**
+    1.  Loads its configuration and rules from `src/config/configuration.json`.
+    2.  Filters available LLM engines based on their `locked` and `toggle` status.
+    3.  Applies a set of rules based on keywords in the task prompt (e.g., 'code', 'summarize').
+    4.  Falls back to a default engine if no rules match.
+
+### 3.5. Task State Manager (`src/tasks_state/task_state_manager.py`)
+- **Responsibility:** Manages the state of all tasks in the system.
+- **Functionality:**
+    - Creates, updates, and retrieves the state of each task as a JSON file in the `src/tasks_state/` directory.
+    - Implements file locking to prevent race conditions.
+    - Maintains a history of state changes for each task.
+
+### 3.6. Metrics Collector (`src/core/metrics_collector.py`)
+- **Responsibility:** Collects and calculates real-time metrics for the application.
+- **Metrics Tracked:** Total requests, success/failure rates, active tasks, average response time, server uptime, etc.
+
+## 4. Communication Flow (Task Lifecycle)
+
+1.  A **Client** sends a `POST` request to `/api/v1/tasks`.
+2.  The **API Handler** receives the request, creates a unique `task_id`, and publishes a task message to the `ai-agent-server.tasks.inbound` queue on RabbitMQ. It immediately responds to the client with the `task_id` and a "Queued" status.
+3.  The **Orchestration Engine**, which is subscribed to the `inbound` queue, consumes the task message.
+4.  The **Orchestration Engine** diagnoses the task, creates its state, and dispatches it to the appropriate **Agent**.
+5.  The **Agent** processes the task. Upon completion (or failure), it publishes a feedback message to the `ai-agent-server.tasks.feedback` queue, including the `task_id` and the result.
+6.  The **Orchestration Engine** consumes the feedback message, updates the final state of the task in the `TaskStateManager`, and updates the final metrics.
+7.  The client can poll a (not-yet-implemented) `GET /api/v1/tasks/{task_id}` endpoint to check the status and retrieve the final result.
