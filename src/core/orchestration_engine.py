@@ -224,8 +224,9 @@ class OrchestrationEngine:
         try:
             self.mcp_handler.connect()
             self.mcp_handler.subscribe_to_channel('ai-agent-server.tasks.inbound', self.handle_mcp_task)
+            self.mcp_handler.subscribe_to_channel('ai-agent-server.tasks.feedback', self.handle_feedback_message)
             self.mcp_handler.start_consuming()
-            print("MCP Handler connected and consuming.")
+            print("MCP Handler connected and consuming from inbound and feedback channels.")
         except Exception as e:
             print(f"Failed to initialize MCP Handler: {e}")
 
@@ -309,6 +310,36 @@ class OrchestrationEngine:
             self.metrics_collector.increment_failed_requests()
             self.metrics_collector.task_finished()
 
+    def handle_feedback_message(self, message_body: bytes):
+        """
+        Callback function to handle feedback messages from agents.
+        """
+        try:
+            feedback_data = json.loads(message_body.decode('utf-8'))
+            task_id = feedback_data.get("task_id")
+            status = feedback_data.get("status")
+            payload = feedback_data.get("payload")
+
+            if not task_id:
+                print("Feedback message received without a task_id.")
+                return
+
+            print(f"Received feedback for task {task_id}: Status - {status}")
+            self.task_state_manager.update_task_state(task_id, new_status=status, new_payload=payload)
+            self.task_state_manager.add_history(task_id, f"Feedback Received: {status}", payload)
+
+            # Here, more complex logic could decide if the task is complete,
+            # needs to be rerouted, or requires another step.
+            # For now, we'll consider a "Completed" status as final.
+            if status == "Completed":
+                self.metrics_collector.increment_successful_requests()
+                # Note: We might need to adjust how response time is calculated for multi-step tasks.
+
+        except json.JSONDecodeError:
+            print("Error decoding JSON feedback message.")
+        except Exception as e:
+            print(f"Error processing feedback message: {e}")
+
     def _handle_chat_mode(self, task_id: str, prompt: str):
         """Handles requests in Chat mode."""
         chat_agent = self.agents.get('chat')
@@ -336,19 +367,24 @@ class OrchestrationEngine:
             return
 
         if hasattr(agent_instance, 'generate_response'):
-            selected_engine_name = self.load_balancer.select_llm_engine({"prompt": prompt})
-            llm_engine = self.llm_engines.get(selected_engine_name.split('_')[0]) if selected_engine_name else None
-
-            if llm_engine:
-                response = llm_engine.generate_response(prompt)
-                print(f"LLM Engine response: {response}")
-                self.task_state_manager.complete_task(task_id, final_result=response)
-                self.metrics_collector.increment_successful_requests()
-            else:
-                error_msg = "No suitable LLM engine found."
-                print(error_msg)
-                self.task_state_manager.fail_task(task_id, error_message=error_msg)
-                self.metrics_collector.increment_failed_requests()
+            # SIMULATION: Instead of calling the agent directly, we publish a feedback message
+            # as if the agent had processed the task and is reporting back.
+            print(f"Simulating agent '{target_role}' processing task {task_id}.")
+            
+            # Simulate some work
+            time.sleep(1) 
+            
+            # Simulate a successful result
+            simulated_response = f"This is a simulated successful response from {target_role}."
+            feedback_message = {
+                "task_id": task_id,
+                "status": "Completed",
+                "payload": {"result": simulated_response}
+            }
+            self.mcp_handler.publish_message('ai-agent-server.tasks.feedback', feedback_message)
+            
+            # The task is no longer completed here directly. It will be completed
+            # when the feedback message is processed by handle_feedback_message.
         else:
             error_msg = f"Agent '{target_role}' does not have a 'generate_response' method."
             print(error_msg)

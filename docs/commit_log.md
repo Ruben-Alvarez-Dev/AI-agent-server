@@ -352,7 +352,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - El `LoadBalancer` ahora carga su configuración y reglas desde `src/config/configuration.json`.
 - Refactorización del `OrchestrationEngine` para eliminar la configuración manual del `LoadBalancer`.
 
-## Commit 116: XXX - feat: Implement real-time metrics collection
+## Commit 116: 0c531b6 - feat: Implement real-time metrics collection
 - Creación del `MetricsCollector` para registrar métricas en tiempo real (peticiones, tareas activas, etc.).
 - Integración del `MetricsCollector` en el `OrchestrationEngine` para actualizar las métricas durante el ciclo de vida de las tareas.
 - Modificación del endpoint `/api/v1/metrics` en `APIHandler` para devolver las métricas reales del `MetricsCollector`.
+
+## Commit 117: XXX - feat: Implement full feedback loop via MCP
+- El `OrchestrationEngine` ahora se suscribe al canal de feedback `ai-agent-server.tasks.feedback`.
+- Creación del método `handle_feedback_message` para procesar los mensajes de los agentes.
+- Simulación del envío de feedback por parte de los agentes en el `_handle_agent_mode` para probar el bucle.
