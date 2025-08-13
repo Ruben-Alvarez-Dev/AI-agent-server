@@ -15,6 +15,7 @@ load_balancer = None
 diagnosis_agent = None
 ollama_engine = None # Placeholder for OllamaEngine
 openai_engine = None # Placeholder for OpenAIEngine
+orchestration_engine = None # Initialize global variable
 
 # --- OrchestrationEngine Class Definition ---
 class OrchestrationEngine:
@@ -179,62 +180,59 @@ def load_agents():
 # --- Initialization Function ---
 def initialize_core_components():
     """Initializes core components like OrchestrationEngine and loads agents."""
-    global task_state_manager, load_balancer, diagnosis_agent, orchestration_engine, ollama_engine, openai_engine
+    global task_state_manager, load_balancer, diagnosis_agent, ollama_engine, openai_engine, orchestration_engine
 
-    # Ensure OrchestrationEngine is instantiated only once
-    if orchestration_engine is None:
-        # orchestration_engine = OrchestrationEngine() # Instantiate the class defined above
-        # The class OrchestrationEngine is defined above, so we can instantiate it directly.
-        # The previous import was causing a NameError.
-        orchestration_engine = OrchestrationEngine()
-        
-        # Initialize and set TaskStateManager
-        from src.tasks_state.task_state_manager import TaskStateManager
-        task_state_manager = TaskStateManager()
-        orchestration_engine.set_task_state_manager(task_state_manager)
-        print("TaskStateManager initialized and set.")
+    # Instantiate OrchestrationEngine and assign to global variable
+    # The class OrchestrationEngine is defined above.
+    orchestration_engine = OrchestrationEngine()
+    
+    # Initialize and set TaskStateManager
+    from src.tasks_state.task_state_manager import TaskStateManager
+    task_state_manager = TaskStateManager()
+    orchestration_engine.set_task_state_manager(task_state_manager)
+    print("TaskStateManager initialized and set.")
 
-        # Initialize and set LoadBalancer
-        from src.load_balancer.load_balancer import LoadBalancer
-        load_balancer = LoadBalancer()
-        # Configure load balancer with dummy data for now, or load from config
-        dummy_engines_config = {
-            "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
-            "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
-        }
-        load_balancer.configure_engines(dummy_engines_config)
-        orchestration_engine.set_load_balancer(load_balancer)
-        print("LoadBalancer initialized and set.")
+    # Initialize and set LoadBalancer
+    from src.load_balancer.load_balancer import LoadBalancer
+    load_balancer = LoadBalancer()
+    # Configure load balancer with dummy data for now, or load from config
+    dummy_engines_config = {
+        "ollama_llama3": {"source": "local", "locked": False, "toggle": True, "model": "llama3"},
+        "openai_gpt4": {"source": "api", "locked": True, "toggle": True, "model": "gpt-4-turbo"}
+    }
+    load_balancer.configure_engines(dummy_engines_config)
+    orchestration_engine.set_load_balancer(load_balancer)
+    print("LoadBalancer initialized and set.")
 
-        # Load agents and set DiagnosisAgent
-        load_agents()
-        if 'diagnosis' in agents:
-            orchestration_engine.diagnosis_agent = agents['diagnosis']
-            print("DiagnosisAgent set for OrchestrationEngine.")
+    # Load agents and set DiagnosisAgent
+    load_agents()
+    if 'diagnosis' in agents:
+        orchestration_engine.diagnosis_agent = agents['diagnosis']
+        print("DiagnosisAgent set for OrchestrationEngine.")
+    else:
+        print("DiagnosisAgent not available to set for OrchestrationEngine.")
+    
+    # Initialize LLM Engines
+    try:
+        from src.llm_engines.local.ollama_engine import OllamaEngine
+        ollama_engine = OllamaEngine()
+        ollama_engine.connect() # Connect to local Ollama
+        print("OllamaEngine initialized and connected.")
+    except ImportError:
+        print("OllamaEngine not found.")
+    
+    try:
+        from src.llm_engines.api.openai_engine import OpenAIEngine
+        openai_engine = OpenAIEngine()
+        # OpenAI engine initialization relies on API key being set in env vars
+        if openai_engine.api_key:
+            print("OpenAI Engine initialized.")
         else:
-            print("DiagnosisAgent not available to set for OrchestrationEngine.")
-        
-        # Initialize LLM Engines
-        try:
-            from src.llm_engines.local.ollama_engine import OllamaEngine
-            ollama_engine = OllamaEngine()
-            ollama_engine.connect() # Connect to local Ollama
-            print("OllamaEngine initialized and connected.")
-        except ImportError:
-            print("OllamaEngine not found.")
-        
-        try:
-            from src.llm_engines.api.openai_engine import OpenAIEngine
-            openai_engine = OpenAIEngine()
-            # OpenAI engine initialization relies on API key being set in env vars
-            if openai_engine.api_key:
-                print("OpenAI Engine initialized.")
-            else:
-                print("OpenAI Engine initialized but API key not set.")
-        except ImportError:
-            print("OpenAI Engine not found.")
+            print("OpenAI Engine initialized but API key not set.")
+    except ImportError:
+        print("OpenAI Engine not found.")
 
-        print("Core components initialized.")
+    print("Core components initialized.")
 
 # Initialize components on startup
 initialize_core_components()
