@@ -11,8 +11,6 @@ class DiagnosisAgent:
         operational mode (Chat, Agent, Plan), and identify the target profile and role.
         Aims to classify 'at the speed of light'.
         """
-        # Placeholder for analysis logic
-        # This would involve NLP, intent recognition, etc.
         analysis_result = {
             "original_prompt": user_prompt,
             "classified_nature": "unknown",
@@ -22,45 +20,66 @@ class DiagnosisAgent:
             "confidence_score": 0.0
         }
         print(f"Analyzing request: {user_prompt}")
-        # Simulate analysis
-        if "hello" in user_prompt.lower():
+
+        # Enhanced simulation of analysis logic
+        prompt_lower = user_prompt.lower()
+
+        if "hello" in prompt_lower or "hi" in prompt_lower or "hey" in prompt_lower:
             analysis_result["classified_nature"] = "greeting"
             analysis_result["operational_mode"] = "Chat"
             analysis_result["target_profile"] = "General"
             analysis_result["target_role"] = "Chat-Agent"
-            analysis_result["confidence_score"] = 0.9
-        elif "summarize" in user_prompt.lower() or "explain" in user_prompt.lower():
+            analysis_result["confidence_score"] = 0.95
+        elif "summarize" in prompt_lower or "explain" in prompt_lower or "what is" in prompt_lower or "tell me about" in prompt_lower:
             analysis_result["classified_nature"] = "information_request"
             analysis_result["operational_mode"] = "Agent"
             analysis_result["target_profile"] = "Productivity"
-            analysis_result["target_role"] = "Writing-Agent" # Or Teacher-Agent
-            analysis_result["confidence_score"] = 0.85
-        elif "develop" in user_prompt.lower() or "create code" in user_prompt.lower() or "plan" in user_prompt.lower():
+            analysis_result["target_role"] = "Writing-Agent" # Could also be Teacher-Agent
+            analysis_result["confidence_score"] = 0.90
+        elif "develop" in prompt_lower or "create code" in prompt_lower or "plan" in prompt_lower or "design" in prompt_lower or "implement" in prompt_lower:
             analysis_result["classified_nature"] = "development_task"
             analysis_result["operational_mode"] = "Plan"
             analysis_result["target_profile"] = "Developer"
             analysis_result["target_role"] = "Architect-Agent" # Or Planner-Agent
             analysis_result["confidence_score"] = 0.95
+        elif "debug" in prompt_lower or "fix error" in prompt_lower or "solve problem" in prompt_lower:
+            analysis_result["classified_nature"] = "debugging_task"
+            analysis_result["operational_mode"] = "Plan" # Debugging often requires planning
+            analysis_result["target_profile"] = "Developer"
+            analysis_result["target_role"] = "Debug-Agent"
+            analysis_result["confidence_score"] = 0.90
+        elif "analyze" in prompt_lower or "research" in prompt_lower:
+            analysis_result["classified_nature"] = "research_task"
+            analysis_result["operational_mode"] = "Plan" # Research often requires planning
+            analysis_result["target_profile"] = "Developer"
+            analysis_result["target_role"] = "Research-Agent"
+            analysis_result["confidence_score"] = 0.85
         else:
+            # Default for general queries or unrecognized patterns
             analysis_result["classified_nature"] = "general_query"
             analysis_result["operational_mode"] = "Chat"
             analysis_result["target_profile"] = "General"
             analysis_result["target_role"] = "Chat-Agent"
-            analysis_result["confidence_score"] = 0.7
+            analysis_result["confidence_score"] = 0.75
 
         return analysis_result
 
     def classify_intent(self, user_prompt: str) -> str:
         """
         Classifies the user's intent, which helps in determining the operational mode.
+        This is a simplified helper function.
         """
-        # This is a simplified version; a real implementation would be more complex.
-        if "hello" in user_prompt.lower():
+        prompt_lower = user_prompt.lower()
+        if "hello" in prompt_lower or "hi" in prompt_lower or "hey" in prompt_lower:
             return "greeting"
-        elif "summarize" in user_prompt.lower() or "explain" in user_prompt.lower():
+        elif "summarize" in prompt_lower or "explain" in prompt_lower or "what is" in prompt_lower or "tell me about" in prompt_lower:
             return "information_request"
-        elif "develop" in user_prompt.lower() or "create code" in user_prompt.lower() or "plan" in user_prompt.lower():
+        elif "develop" in prompt_lower or "create code" in prompt_lower or "plan" in prompt_lower or "design" in prompt_lower or "implement" in prompt_lower:
             return "development_task"
+        elif "debug" in prompt_lower or "fix error" in prompt_lower or "solve problem" in prompt_lower:
+            return "debugging_task"
+        elif "analyze" in prompt_lower or "research" in prompt_lower:
+            return "research_task"
         else:
             return "general_query"
 
@@ -72,7 +91,7 @@ class DiagnosisAgent:
             return "Chat"
         elif classified_nature == "information_request":
             return "Agent"
-        elif classified_nature == "development_task":
+        elif classified_nature in ["development_task", "debugging_task", "research_task"]:
             return "Plan"
         else:
             return "Chat" # Default to Chat mode
@@ -87,6 +106,10 @@ class DiagnosisAgent:
             return "Productivity", "Writing-Agent" # Or Teacher-Agent
         elif classified_nature == "development_task":
             return "Developer", "Architect-Agent" # Or Planner-Agent
+        elif classified_nature == "debugging_task":
+            return "Developer", "Debug-Agent"
+        elif classified_nature == "research_task":
+            return "Developer", "Research-Agent"
         else:
             return "General", "Chat-Agent" # Default
 
