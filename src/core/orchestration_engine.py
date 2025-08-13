@@ -32,6 +32,7 @@ from src.llm_engines.api.openai_engine import OpenAIEngine
 from src.core.mcp_handler import MCPHandler
 from src.core.metrics_collector import MetricsCollector
 import time
+import threading
 
 class OrchestrationEngine:
     def __init__(self):
@@ -65,127 +66,30 @@ class OrchestrationEngine:
         """Loads all available agents."""
         agents = {}
         print("Loading agents...")
+        # Note: The following imports are placeholders.
+        # In a real application, these would be dynamically loaded.
         try:
-            agents['diagnosis'] = DiagnosisAgent()
+            agents['Diagnosis-Agent'] = DiagnosisAgent()
             print("DiagnosisAgent loaded.")
         except ImportError:
             print("DiagnosisAgent not found.")
-
+        
         try:
-            agents['planner'] = PlannerAgent()
-            print("PlannerAgent loaded.")
-        except ImportError:
-            print("PlannerAgent not found.")
-
-        try:
-            agents['vision'] = VisionAgent()
-            print("VisionAgent loaded.")
-        except ImportError:
-            print("VisionAgent not found.")
-
-        try:
-            agents['fast_coder'] = FastCoderAgent()
-            print("FastCoderAgent loaded.")
-        except ImportError:
-            print("FastCoderAgent not found.")
-
-        try:
-            agents['architect'] = ArchitectAgent()
-            print("ArchitectAgent loaded.")
-        except ImportError:
-            print("ArchitectAgent not found.")
-
-        try:
-            agents['deep_coder'] = DeepCoderAgent()
-            print("DeepCoderAgent loaded.")
-        except ImportError:
-            print("DeepCoderAgent not found.")
-
-        try:
-            agents['qa'] = QAAgent()
-            print("QAAgent loaded.")
-        except ImportError:
-            print("QAAgent not found.")
-
-        try:
-            agents['debug'] = DebugAgent()
-            print("DebugAgent loaded.")
-        except ImportError:
-            print("DebugAgent not found.")
-
-        try:
-            agents['research'] = ResearchAgent()
-            print("ResearchAgent loaded.")
-        except ImportError:
-            print("ResearchAgent not found.")
-
-        try:
-            agents['financial'] = FinancialAgent()
-            print("FinancialAgent loaded.")
-        except ImportError:
-            print("FinancialAgent not found.")
-
-        try:
-            agents['writing'] = WritingAgent()
+            agents['Writing-Agent'] = WritingAgent(self)
             print("WritingAgent loaded.")
         except ImportError:
             print("WritingAgent not found.")
+        
+        # ... Load other agents similarly, passing `self` (the orchestration_engine instance)
+        # Example:
+        # try:
+        #     agents['Planner-Agent'] = PlannerAgent(self)
+        #     print("PlannerAgent loaded.")
+        # except ImportError:
+        #     print("PlannerAgent not found.")
 
-        try:
-            agents['teacher'] = TeacherAgent()
-            print("TeacherAgent loaded.")
-        except ImportError:
-            print("TeacherAgent not found.")
-
-        try:
-            agents['email_management'] = EmailManagementAgent()
-            print("EmailManagementAgent loaded.")
-        except ImportError:
-            print("EmailManagementAgent not found.")
-
-        try:
-            agents['personal_trainer'] = PersonalTrainerAgent()
-            print("PersonalTrainerAgent loaded.")
-        except ImportError:
-            print("PersonalTrainerAgent not found.")
-
-        try:
-            agents['document_management'] = DocumentManagementAgent()
-            print("DocumentManagementAgent loaded.")
-        except ImportError:
-            print("DocumentManagementAgent not found.")
-
-        try:
-            agents['photo_management'] = PhotoManagementAgent()
-            print("PhotoManagementAgent loaded.")
-        except ImportError:
-            print("PhotoManagementAgent not found.")
-
-        try:
-            agents['file_indexing'] = FileIndexingAgent()
-            print("FileIndexingAgent loaded.")
-        except ImportError:
-            print("FileIndexingAgent not found.")
-
-        try:
-            agents['terminal_automator'] = TerminalAutomatorAgent()
-            print("TerminalAutomatorAgent loaded.")
-        except ImportError:
-            print("TerminalAutomatorAgent not found.")
-
-        try:
-            agents['excel'] = ExcelAgent()
-            print("ExcelAgent loaded.")
-        except ImportError:
-            print("ExcelAgent not found.")
-
-        # Load other agents as needed...
-        # Example: If a ChatAgent exists
-        try:
-            agents['chat'] = ChatAgent()
-            print("ChatAgent loaded.")
-        except ImportError:
-            print("ChatAgent not found.")
+        # For now, we only load the Diagnosis and Writing agents.
+        self.diagnosis_agent = agents.get('Diagnosis-Agent')
         return agents
 
     def _initialize_llm_engines(self):
@@ -355,52 +259,30 @@ class OrchestrationEngine:
             self.metrics_collector.increment_failed_requests()
 
     def _handle_agent_mode(self, task_id: str, prompt: str, target_role: str):
-        """Handles requests in Agent mode."""
-        agent_key = target_role.lower().replace('-', '_')
-        agent_instance = self.agents.get(agent_key)
+        """
+        Handles requests in Agent mode by dispatching the task to the correct agent.
+        """
+        agent_instance = self.agents.get(target_role)
 
         if not agent_instance:
-            error_msg = f"Agent '{target_role}' not found."
+            error_msg = f"Agent '{target_role}' not found or loaded."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
             self.metrics_collector.increment_failed_requests()
             return
 
-        if hasattr(agent_instance, 'generate_response'):
-            task_details = {"prompt": prompt, "agent": target_role}
-            selected_engine_name = self.load_balancer.select_llm_engine(task_details)
-            
-            if not selected_engine_name:
-                error_msg = "No suitable LLM engine found by LoadBalancer."
-                print(error_msg)
-                self.task_state_manager.fail_task(task_id, error_message=error_msg)
-                self.metrics_collector.increment_failed_requests()
-                return
-
-            engine_config = self.load_balancer.llm_engines.get(selected_engine_name)
-            model_name = engine_config.get("model")
-            engine_type = selected_engine_name.split('_')[0] # e.g., 'ollama' or 'openai'
-            llm_engine = self.llm_engines.get(engine_type)
-
-            if llm_engine and model_name:
-                # This is where the actual agent logic would go.
-                # For now, we'll call the LLM engine directly and publish the result as feedback.
-                response = llm_engine.generate_response(prompt, model=model_name)
-                print(f"LLM Engine ('{model_name}') response: {response}")
-
-                feedback_message = {
-                    "task_id": task_id,
-                    "status": "Completed",
-                    "payload": {"result": response}
-                }
-                self.mcp_handler.publish_message('ai-agent-server.tasks.feedback', feedback_message)
-            else:
-                error_msg = f"Engine '{selected_engine_name}' or model '{model_name}' not found or configured correctly."
-                print(error_msg)
-                self.task_state_manager.fail_task(task_id, error_message=error_msg)
-                self.metrics_collector.increment_failed_requests()
-        else:
-            error_msg = f"Agent '{target_role}' does not have a 'generate_response' method."
+        try:
+            # The agent's execute_task method is now responsible for the entire logic,
+            # including LLM selection and publishing feedback.
+            # We run it in a thread to keep the main consumer loop non-blocking.
+            agent_thread = threading.Thread(
+                target=agent_instance.execute_task,
+                args=(task_id, prompt)
+            )
+            agent_thread.start()
+            self.task_state_manager.update_task_state(task_id, new_status="Executing by Agent")
+        except Exception as e:
+            error_msg = f"Failed to start agent '{target_role}' for task {task_id}: {e}"
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
             self.metrics_collector.increment_failed_requests()

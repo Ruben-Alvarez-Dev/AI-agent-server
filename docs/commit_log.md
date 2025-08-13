@@ -372,5 +372,10 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - Creación de un `ConfigLoader` singleton para centralizar el acceso a `configuration.json`.
 - Refactorización de `LoadBalancer` y `MCPHandler` para usar la configuración centralizada.
 
-## Commit 120: XXX - feat: Create BaseAgent class
+## Commit 120: fc46146 - feat: Create BaseAgent class
 - Creación de la clase base abstracta `BaseAgent` en `src/agents/base_agent.py` para estandarizar la interfaz de todos los agentes.
+
+## Commit 121: XXX - feat: Implement WritingAgent logic
+- Implementación de la lógica real en `WritingAgent`, heredando de `BaseAgent`.
+- El agente ahora selecciona un LLM a través del `LoadBalancer` y publica su resultado en el canal de feedback de MCP.
+- Refactorización del `OrchestrationEngine` para cargar y despachar tareas a los agentes reales de forma asíncrona.
