@@ -112,7 +112,9 @@ class OrchestrationEngine:
         analysis = self.diagnosis_agent.analyze_request(user_prompt)
         print(f"Analysis result: {analysis}")
 
+        classified_nature = analysis.get("classified_nature")
         operational_mode = analysis.get("operational_mode")
+        target_profile = analysis.get("target_profile")
         target_role = analysis.get("target_role")
         confidence = analysis.get("confidence_score")
 
@@ -123,7 +125,7 @@ class OrchestrationEngine:
             initial_payload={"analysis": analysis}
         )
         if not task_id:
-            print("Failed to create task state. Aborting.")
+            print("Failed to create task state. Cannot proceed.")
             return
 
         # 3. Route based on analysis
