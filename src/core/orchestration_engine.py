@@ -14,6 +14,19 @@ from src.load_balancer.load_balancer import LoadBalancer
 from src.llm_engines.local.ollama_engine import OllamaEngine
 from src.llm_engines.api.openai_engine import OpenAIEngine
 
+# Placeholder agents for feedback loop simulation
+class QAAgent:
+    def review_code(self, code):
+        print("QA Agent reviewing code...")
+        if "bug" in code:
+            return {"status": "failed", "details": "Found a bug."}
+        return {"status": "passed"}
+
+class DebugAgent:
+    def debug_code(self, code, error_details):
+        print(f"Debug Agent debugging code with error: {error_details}")
+        return f"Fixed code (removed bug)"
+
 class OrchestrationEngine:
     def __init__(self):
         """
@@ -58,6 +71,18 @@ class OrchestrationEngine:
             print("VisionAgent loaded.")
         except ImportError:
             print("VisionAgent not found.")
+
+        try:
+            agents['qa'] = QAAgent()
+            print("QAAgent loaded.")
+        except ImportError:
+            print("QAAgent not found.")
+
+        try:
+            agents['debug'] = DebugAgent()
+            print("DebugAgent loaded.")
+        except ImportError:
+            print("DebugAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
@@ -185,17 +210,54 @@ class OrchestrationEngine:
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
 
     def _handle_plan_mode(self, task_id: str, prompt: str, analysis: dict):
-        """Handles requests in Plan mode."""
+        """Handles requests in Plan mode, including the feedback loop."""
         planner_agent = self.agents.get('planner')
-        if planner_agent:
-            design_hint = f"Based on guide and analysis: {analysis.get('classified_nature', 'N/A')}"
-            plan = planner_agent.create_plan(design_hint, prompt)
-            print(f"Planner Agent generated plan: {plan}")
-            self.task_state_manager.update_task_state(task_id, new_status="Planned", new_payload={"plan": plan})
-        else:
-            error_msg = "PlannerAgent not available."
+        qa_agent = self.agents.get('qa')
+        debug_agent = self.agents.get('debug')
+
+        if not all([planner_agent, qa_agent, debug_agent]):
+            error_msg = "Missing required agents for Plan mode (Planner, QA, or Debug)."
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+            return
+
+        # 1. Create a plan
+        design_hint = f"Based on guide and analysis: {analysis.get('classified_nature', 'N/A')}"
+        plan = planner_agent.create_plan(design_hint, prompt)
+        print(f"Planner Agent generated plan: {plan}")
+        self.task_state_manager.update_task_state(task_id, new_status="Planned", new_payload={"plan": plan})
+
+        # 2. Execute the plan (simulated)
+        # In a real scenario, this would iterate through plan steps and call coder agents.
+        # For this simulation, we'll assume a single coding step.
+        simulated_code = "This is the initial code. It might contain a bug."
+        print(f"Executing plan step: writing code...")
+        self.task_state_manager.update_task_state(task_id, new_status="Executing", new_payload={"code": simulated_code})
+
+        # 3. QA Review and Feedback Loop
+        max_retries = 3
+        for i in range(max_retries):
+            print(f"QA review attempt {i + 1}/{max_retries}")
+            qa_result = qa_agent.review_code(simulated_code)
+            self.task_state_manager.add_history(task_id, f"QA Review: {qa_result['status']}", {"qa_details": qa_result})
+
+            if qa_result["status"] == "passed":
+                print("QA review passed. Completing task.")
+                self.task_state_manager.complete_task(task_id, final_result=simulated_code)
+                return
+            else:
+                print("QA review failed. Initiating debug cycle.")
+                # 4. Debugging
+                error_details = qa_result.get("details", "No details provided.")
+                simulated_code = debug_agent.debug_code(simulated_code, error_details)
+                self.task_state_manager.update_task_state(task_id, new_status="Debugging", new_payload={"code": simulated_code})
+                self.task_state_manager.add_history(task_id, "Debug", {"action": "Code fixed by Debug Agent."})
+        
+        # If loop finishes, it means max retries were reached
+        error_msg = "Failed to fix the code after multiple attempts."
+        print(error_msg)
+        self.task_state_manager.fail_task(task_id, error_message=error_msg)
+
 
 # Example of how the Orchestration Engine might be initialized and used:
 if __name__ == "__main__":
@@ -204,7 +266,7 @@ if __name__ == "__main__":
     
     # Process some requests
     print("\n--- Processing Requests ---")
-    if orchestration_engine:
+    if 'orchestration_engine' in globals():
         orchestration_engine.process_request("Hello there!")
         orchestration_engine.process_request("Can you summarize this document for me?")
         orchestration_engine.process_request("I need to develop a new feature for the UI.")
