@@ -1,113 +1,134 @@
 # MCP Handler
 
 import json
-# Assume necessary imports for MCP communication libraries are available
-# For example, using a library like 'pika' for RabbitMQ or a custom MCP client.
+import pika
+import threading
+import time
 
 class MCPHandler:
-    def __init__(self):
-        # Initialize MCP client and connection details
-        self.mcp_client = None # Placeholder for actual MCP client initialization
-        self.inbound_channel = "ai-agent-server.tasks.inbound"
-        self.feedback_channel = "ai-agent-server.tasks.feedback"
-        self.metrics_channel = "ai-agent-server.metrics"
-        print("MCP Handler initialized.")
+    def __init__(self, rabbitmq_host='localhost'):
+        """
+        Initializes the MCP Handler for RabbitMQ communication.
+        """
+        self.rabbitmq_host = rabbitmq_host
+        self.connection = None
+        self.channel = None
+        self.consuming_thread = None
+        self.callbacks = {}
+        self.is_consuming = False
+        print("MCP Handler initialized for RabbitMQ.")
 
-    def connect(self, connection_details: dict):
+    def connect(self):
         """
-        Establishes a connection to the MCP broker.
+        Establishes a connection to the RabbitMQ broker.
         """
-        print(f"Connecting to MCP broker with details: {connection_details}")
-        # Placeholder for actual connection logic
-        # self.mcp_client = MCPClient(connection_details)
-        # self.mcp_client.connect()
-        self.mcp_client = "connected_mock_client" # Simulate connection
-        print("Connected to MCP broker.")
-
-    def publish_message(self, channel: str, message: dict):
-        """
-        Publishes a message to a specified MCP channel.
-        """
-        if not self.mcp_client:
-            print("MCP client not connected. Cannot publish message.")
+        if self.connection and self.connection.is_open:
             return
-        
-        print(f"Publishing to channel '{channel}': {json.dumps(message, indent=2)}")
-        # Placeholder for actual message publishing logic
-        # self.mcp_client.publish(channel, json.dumps(message))
 
-    def subscribe_to_channel(self, channel: str, callback):
+        try:
+            print(f"Connecting to RabbitMQ broker at {self.rabbitmq_host}...")
+            self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.rabbitmq_host))
+            self.channel = self.connection.channel()
+            print("Successfully connected to RabbitMQ broker.")
+        except pika.exceptions.AMQPConnectionError as e:
+            print(f"Error connecting to RabbitMQ: {e}")
+            self.connection = None
+            self.channel = None
+            raise
+
+    def publish_message(self, queue_name: str, message: dict):
         """
-        Subscribes to an MCP channel and registers a callback function
-        to handle incoming messages.
+        Publishes a message to a specified RabbitMQ queue.
         """
-        if not self.mcp_client:
-            print("MCP client not connected. Cannot subscribe to channel.")
+        if not self.channel:
+            print("MCP channel not available. Cannot publish message.")
             return
+
+        try:
+            self.channel.queue_declare(queue=queue_name, durable=True)
+            self.channel.basic_publish(
+                exchange='',
+                routing_key=queue_name,
+                body=json.dumps(message),
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # make message persistent
+                ))
+            print(f"Published to queue '{queue_name}': {json.dumps(message, indent=2)}")
+        except Exception as e:
+            print(f"Error publishing message to RabbitMQ: {e}")
+
+    def subscribe_to_channel(self, queue_name: str, callback):
+        """
+        Registers a callback for a specific queue.
+        """
+        self.callbacks[queue_name] = callback
+        print(f"Callback registered for queue '{queue_name}'.")
+        if self.is_consuming and self.channel:
+             # If already consuming, just declare the new queue and start consuming from it
+            self.channel.queue_declare(queue=queue_name, durable=True)
+            self.channel.basic_consume(queue=queue_name, on_message_callback=self._on_message, auto_ack=False)
+
+
+    def _on_message(self, ch, method, properties, body):
+        """Internal callback to dispatch messages to the correct handler."""
+        queue_name = method.routing_key
+        if queue_name in self.callbacks:
+            try:
+                self.callbacks[queue_name](body)
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+            except Exception as e:
+                print(f"Error processing message from '{queue_name}': {e}")
+                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False) # Move to DLQ if configured
+        else:
+            print(f"No callback registered for queue '{queue_name}'. Discarding message.")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    def start_consuming(self):
+        """
+        Starts consuming messages from all subscribed queues in a separate thread.
+        """
+        if not self.channel:
+            print("MCP channel not available. Cannot start consuming.")
+            return
+
+        if self.is_consuming:
+            print("Already consuming messages.")
+            return
+
+        self.is_consuming = True
+        self.consuming_thread = threading.Thread(target=self._consume_loop, daemon=True)
+        self.consuming_thread.start()
+        print("Started consuming messages in a background thread.")
+
+    def _consume_loop(self):
+        """The actual loop that consumes messages from RabbitMQ."""
+        # Re-establish channel in the new thread
+        local_connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.rabbitmq_host))
+        local_channel = local_connection.channel()
         
-        print(f"Subscribing to channel '{channel}' with callback.")
-        # Placeholder for actual subscription logic
-        # self.mcp_client.subscribe(channel, callback)
-
-    def handle_inbound_task(self, message_body: str):
-        """
-        Callback function to handle incoming task requests from the inbound channel.
-        """
-        print(f"Received task request via MCP: {message_body}")
-        # Parse the message and pass it to the Orchestration Engine
+        print("Consumer thread started.")
+        for queue_name in self.callbacks.keys():
+            local_channel.queue_declare(queue=queue_name, durable=True)
+            local_channel.basic_consume(queue=queue_name, on_message_callback=self._on_message, auto_ack=False)
+        
         try:
-            task_data = json.loads(message_body)
-            # Assume task_data is a dictionary representing the task prompt and metadata
-            # This would then be passed to the OrchestrationEngine's process_request method
-            # For example: orchestration_engine.process_request(task_data.get("prompt"))
-            print("Task request processed by MCP Handler.")
-        except json.JSONDecodeError:
-            print("Error decoding JSON message.")
+            local_channel.start_consuming()
+        except Exception as e:
+            print(f"Consumer thread encountered an error: {e}")
+        finally:
+            local_connection.close()
+            print("Consumer thread stopped.")
+            self.is_consuming = False
 
-    def handle_feedback_message(self, message_body: str):
-        """
-        Callback function to handle incoming feedback messages from agents.
-        """
-        print(f"Received feedback via MCP: {message_body}")
-        # Parse feedback and update task state or trigger re-routing
-        try:
-            feedback_data = json.loads(message_body)
-            # This feedback would be processed by the Orchestration Engine
-            # For example: orchestration_engine.handle_feedback(feedback_data)
-            print("Feedback message processed by MCP Handler.")
-        except json.JSONDecodeError:
-            print("Error decoding JSON message.")
 
-    def handle_metrics_message(self, message_body: str):
+    def close(self):
         """
-        Callback function to handle incoming metrics from internal services.
+        Closes the connection to RabbitMQ.
         """
-        print(f"Received metrics via MCP: {message_body}")
-        # Store or process metrics for later retrieval via the API endpoint
-        try:
-            metrics_data = json.loads(message_body)
-            # Store metrics data (e.g., in memory or a time-series database)
-            print("Metrics data processed by MCP Handler.")
-        except json.JSONDecodeError:
-            print("Error decoding JSON message.")
-
-# Example of how MCPHandler might be used:
-# if __name__ == "__main__":
-#     mcp_handler = MCPHandler()
-#     # Replace with actual connection details
-#     connection_info = {"host": "localhost", "port": 5672, "username": "guest", "password": "guest"}
-#     mcp_handler.connect(connection_info)
-#
-#     # Subscribe to channels
-#     mcp_handler.subscribe_to_channel(mcp_handler.inbound_channel, mcp_handler.handle_inbound_task)
-#     mcp_handler.subscribe_to_channel(mcp_handler.feedback_channel, mcp_handler.handle_feedback_message)
-#     mcp_handler.subscribe_to_channel(mcp_handler.metrics_channel, mcp_handler.handle_metrics_message)
-#
-#     # Simulate publishing a message
-#     task_message = {"prompt": "Develop a new feature.", "profile": "Developer", "role": "Architect-Agent"}
-#     mcp_handler.publish_message(mcp_handler.inbound_channel, task_message)
-#
-#     # Keep the script running to listen for messages (in a real app)
-#     # import time
-#     # while True:
-#     #     time.sleep(1)
+        if self.is_consuming and self.consuming_thread:
+            self.is_consuming = False
+            # The consumer is blocking, so we can't join it directly.
+            # Pika recommends closing the connection from another thread.
+            if self.connection and self.connection.is_open:
+                self.connection.close()
+            print("RabbitMQ connection closed.")

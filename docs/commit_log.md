@@ -340,3 +340,9 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 
 ## Commit 113: 8e7ae77 - feat: Integrate TerminalAutomatorAgent into OrchestrationEngine
 - Integración del `TerminalAutomatorAgent` en el `OrchestrationEngine`.
+
+## Commit 114: XXX - feat: Implement MCP Handler with RabbitMQ for async task processing
+- Implementación del `MCPHandler` con `pika` para la comunicación asíncrona.
+- Integración del `MCPHandler` en el `OrchestrationEngine` para consumir tareas de una cola.
+- Modificación del `APIHandler` para publicar tareas en la cola en lugar de procesarlas directamente.
+- Añadido el manejo del ciclo de vida de la conexión RabbitMQ en el arranque y parada de la aplicación.

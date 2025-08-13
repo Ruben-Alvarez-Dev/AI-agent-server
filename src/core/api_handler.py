@@ -63,6 +63,13 @@ def create_app():
         get_orchestration_engine()
         print("FastAPI app started and OrchestrationEngine is ready.")
 
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        orchestration_engine = get_orchestration_engine()
+        if orchestration_engine and orchestration_engine.mcp_handler:
+            print("Closing MCP Handler connection...")
+            orchestration_engine.mcp_handler.close()
+
     @app.post("/api/v1/tasks", response_model=TaskResponse)
     async def create_task(request: TaskRequest):
         orchestration_engine = get_orchestration_engine()
@@ -73,11 +80,11 @@ def create_app():
             task_id = orchestration_engine.process_request(request.prompt)
             
             if task_id:
-                task_state = orchestration_engine.task_state_manager.get_task_state(task_id)
-                status = task_state.get("status") if task_state else "Unknown"
-                return TaskResponse(task_id=task_id, status=status)
+                # The task is now processed asynchronously.
+                # We can immediately return the task ID with a "Queued" status.
+                return TaskResponse(task_id=task_id, status="Queued")
             else:
-                raise HTTPException(status_code=500, detail="Failed to create task.")
+                raise HTTPException(status_code=500, detail="Failed to publish task to the queue.")
 
         except Exception as e:
             print(f"Error in create_task endpoint: {e}")

@@ -29,6 +29,7 @@ from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
 from src.llm_engines.local.ollama_engine import OllamaEngine
 from src.llm_engines.api.openai_engine import OpenAIEngine
+from src.core.mcp_handler import MCPHandler
 
 class OrchestrationEngine:
     def __init__(self):
@@ -40,6 +41,7 @@ class OrchestrationEngine:
         # Initialize components and assign as instance variables
         self.task_state_manager = TaskStateManager()
         self.load_balancer = LoadBalancer()
+        self.mcp_handler = MCPHandler()
         
         # Load agents
         self.agents = self._load_agents()
@@ -50,6 +52,9 @@ class OrchestrationEngine:
 
         # Configure the load balancer with the initialized engines
         self._configure_load_balancer()
+
+        # Connect to MCP and start consuming
+        self._initialize_mcp()
 
         print("Orchestration Engine initialized successfully.")
 
@@ -210,53 +215,80 @@ class OrchestrationEngine:
             self.load_balancer.configure_engines(engine_configs)
             print("LoadBalancer configured.")
 
+    def _initialize_mcp(self):
+        """Initializes the MCP handler, connects, and subscribes to channels."""
+        try:
+            self.mcp_handler.connect()
+            self.mcp_handler.subscribe_to_channel('ai-agent-server.tasks.inbound', self.handle_mcp_task)
+            self.mcp_handler.start_consuming()
+            print("MCP Handler connected and consuming.")
+        except Exception as e:
+            print(f"Failed to initialize MCP Handler: {e}")
+
     def process_request(self, user_prompt: str):
         """
-        Processes a user request by diagnosing it and routing it to the appropriate agent or LLM engine.
+        Receives a user request and publishes it to the inbound task queue.
         """
-        if not self.diagnosis_agent:
-            print("DiagnosisAgent not available. Cannot process request.")
-            return None
-
-        print(f"Orchestration Engine received request: '{user_prompt}'")
-
-        # 1. Diagnose the request
-        analysis = self.diagnosis_agent.analyze_request(user_prompt)
-        print(f"Analysis result: {analysis}")
-
-        classified_nature = analysis.get("classified_nature")
-        operational_mode = analysis.get("operational_mode")
-        target_profile = analysis.get("target_profile")
-        target_role = analysis.get("target_role")
-        confidence = analysis.get("confidence_score")
-
-        # 2. Create a task state
-        task_id = self.task_state_manager.create_task_state(
-            user_prompt, 
-            initial_status="Processing", 
-            initial_payload={"analysis": analysis}
-        )
-        if not task_id:
-            print("Failed to create task state. Cannot proceed.")
-            return None
-
-        # 3. Route based on analysis
-        if confidence < 0.7:
-            operational_mode = "Chat" # Default to Chat on low confidence
-            print("Low confidence in analysis. Defaulting to Chat mode.")
-
-        if operational_mode == "Chat":
-            self._handle_chat_mode(task_id, user_prompt)
-        elif operational_mode == "Agent":
-            self._handle_agent_mode(task_id, user_prompt, target_role)
-        elif operational_mode == "Plan":
-            self._handle_plan_mode(task_id, user_prompt, analysis)
-        else:
-            error_msg = f"Unknown operational mode: {operational_mode}"
-            print(error_msg)
-            self.task_state_manager.fail_task(task_id, error_message=error_msg)
-        
+        task_id = str(uuid.uuid4())
+        task_message = {
+            "task_id": task_id,
+            "prompt": user_prompt,
+            "status": "Received"
+        }
+        self.mcp_handler.publish_message('ai-agent-server.tasks.inbound', task_message)
+        print(f"Task {task_id} published to inbound queue.")
         return task_id
+
+    def handle_mcp_task(self, message_body: bytes):
+        """
+        Callback function to handle tasks received from the MCP inbound queue.
+        """
+        try:
+            task_data = json.loads(message_body.decode('utf-8'))
+            task_id = task_data.get("task_id")
+            user_prompt = task_data.get("prompt")
+            print(f"Orchestration Engine received task from MCP: '{user_prompt}' (ID: {task_id})")
+
+            if not self.diagnosis_agent:
+                print("DiagnosisAgent not available. Cannot process request.")
+                return
+
+            # 1. Diagnose the request
+            analysis = self.diagnosis_agent.analyze_request(user_prompt)
+            print(f"Analysis result: {analysis}")
+
+            operational_mode = analysis.get("operational_mode")
+            target_role = analysis.get("target_role")
+            confidence = analysis.get("confidence_score")
+
+            # 2. Create or update task state
+            self.task_state_manager.create_task_state(
+                user_prompt,
+                initial_status="Processing",
+                initial_payload={"analysis": analysis},
+                task_id=task_id
+            )
+
+            # 3. Route based on analysis
+            if confidence < 0.7:
+                operational_mode = "Chat" # Default to Chat on low confidence
+                print("Low confidence in analysis. Defaulting to Chat mode.")
+
+            if operational_mode == "Chat":
+                self._handle_chat_mode(task_id, user_prompt)
+            elif operational_mode == "Agent":
+                self._handle_agent_mode(task_id, user_prompt, target_role)
+            elif operational_mode == "Plan":
+                self._handle_plan_mode(task_id, user_prompt, analysis)
+            else:
+                error_msg = f"Unknown operational mode: {operational_mode}"
+                print(error_msg)
+                self.task_state_manager.fail_task(task_id, error_message=error_msg)
+
+        except json.JSONDecodeError:
+            print("Error decoding JSON message from MCP.")
+        except Exception as e:
+            print(f"Error handling MCP task: {e}")
 
     def _handle_chat_mode(self, task_id: str, prompt: str):
         """Handles requests in Chat mode."""
