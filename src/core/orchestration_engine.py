@@ -277,3 +277,29 @@ src/core/orchestration_engine.py
 # Current Mode
 ACT MODE
 </environment_details>
+<environment_details>
+# VSCode Visible Files
+src/core/orchestration_engine.py
+
+# VSCode Open Tabs
+src/agents/developer/planner_agent.py
+plan/logs/commit_log.md
+src/agents/developer/diagnosis_agent.py
+src/agents/developer/vision_agent.py
+src/core/api_handler.py
+src/core/mcp_handler.py
+src/load_balancer/load_balancer.py
+src/llm_engines/local/ollama_engine.py
+src/tasks_state/task_state_manager.py
+src/llm_engines/api/openai_engine.py
+src/core/orchestration_engine.py
+
+# Current Time
+13/8/2025, 3:38:08 a. m. (Europe/Madrid, UTC+2:00)
+
+# Context Window Usage
+279.139 / 1100K tokens used (25%)
+
+# Current Mode
+ACT MODE
+</environment_details>
