@@ -304,3 +304,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 
 ## Commit 101: 5475a42 - feat: Integrate PersonalTrainerAgent into OrchestrationEngine
 - Integración del `PersonalTrainerAgent` en el `OrchestrationEngine`.
+
+## Commit 102: 2449fb5 - docs: Update commit_log.md with latest commits
+- Actualización del `commit_log.md` con los últimos commits.
+
+## Commit 103: bccd3c6 - feat: Add initial structure for DocumentManagementAgent
+- Creación de la estructura inicial para el `DocumentManagementAgent`.
+
+## Commit 104: e34876b - feat: Integrate DocumentManagementAgent into OrchestrationEngine
+- Integración del `DocumentManagementAgent` en el `OrchestrationEngine`.
