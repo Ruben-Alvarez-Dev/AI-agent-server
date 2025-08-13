@@ -367,24 +367,38 @@ class OrchestrationEngine:
             return
 
         if hasattr(agent_instance, 'generate_response'):
-            # SIMULATION: Instead of calling the agent directly, we publish a feedback message
-            # as if the agent had processed the task and is reporting back.
-            print(f"Simulating agent '{target_role}' processing task {task_id}.")
+            task_details = {"prompt": prompt, "agent": target_role}
+            selected_engine_name = self.load_balancer.select_llm_engine(task_details)
             
-            # Simulate some work
-            time.sleep(1) 
-            
-            # Simulate a successful result
-            simulated_response = f"This is a simulated successful response from {target_role}."
-            feedback_message = {
-                "task_id": task_id,
-                "status": "Completed",
-                "payload": {"result": simulated_response}
-            }
-            self.mcp_handler.publish_message('ai-agent-server.tasks.feedback', feedback_message)
-            
-            # The task is no longer completed here directly. It will be completed
-            # when the feedback message is processed by handle_feedback_message.
+            if not selected_engine_name:
+                error_msg = "No suitable LLM engine found by LoadBalancer."
+                print(error_msg)
+                self.task_state_manager.fail_task(task_id, error_message=error_msg)
+                self.metrics_collector.increment_failed_requests()
+                return
+
+            engine_config = self.load_balancer.llm_engines.get(selected_engine_name)
+            model_name = engine_config.get("model")
+            engine_type = selected_engine_name.split('_')[0] # e.g., 'ollama' or 'openai'
+            llm_engine = self.llm_engines.get(engine_type)
+
+            if llm_engine and model_name:
+                # This is where the actual agent logic would go.
+                # For now, we'll call the LLM engine directly and publish the result as feedback.
+                response = llm_engine.generate_response(prompt, model=model_name)
+                print(f"LLM Engine ('{model_name}') response: {response}")
+
+                feedback_message = {
+                    "task_id": task_id,
+                    "status": "Completed",
+                    "payload": {"result": response}
+                }
+                self.mcp_handler.publish_message('ai-agent-server.tasks.feedback', feedback_message)
+            else:
+                error_msg = f"Engine '{selected_engine_name}' or model '{model_name}' not found or configured correctly."
+                print(error_msg)
+                self.task_state_manager.fail_task(task_id, error_message=error_msg)
+                self.metrics_collector.increment_failed_requests()
         else:
             error_msg = f"Agent '{target_role}' does not have a 'generate_response' method."
             print(error_msg)

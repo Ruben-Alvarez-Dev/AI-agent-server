@@ -5,12 +5,15 @@ import pika
 import threading
 import time
 
+from src.config.config_loader import config
+
 class MCPHandler:
-    def __init__(self, rabbitmq_host='localhost'):
+    def __init__(self):
         """
         Initializes the MCP Handler for RabbitMQ communication.
         """
-        self.rabbitmq_host = rabbitmq_host
+        mcp_config = config.get("mcp_config", {})
+        self.rabbitmq_host = mcp_config.get("rabbitmq_host", "localhost")
         self.connection = None
         self.channel = None
         self.consuming_thread = None

@@ -362,5 +362,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 - Creación del método `handle_feedback_message` para procesar los mensajes de los agentes.
 - Simulación del envío de feedback por parte de los agentes en el `_handle_agent_mode` para probar el bucle.
 
-## Commit 118: XXX - docs: Create system architecture document
+## Commit 118: 9c66721 - docs: Create system architecture document
 - Creación del documento `doc/architecture.md` que detalla la arquitectura del sistema, los componentes principales y el flujo de comunicación.
+
+## Commit 119: XXX - feat: Implement multi-model support and config centralization
+- Adopción de una estrategia multi-modelo ultraligera para entornos de bajos recursos.
+- Refactorización del `OllamaEngine` para gestionar la carga dinámica de modelos.
+- Implementación del endpoint `GET /api/v1/tasks/{task_id}` para consultar el estado de las tareas.
+- Creación de un `ConfigLoader` singleton para centralizar el acceso a `configuration.json`.
+- Refactorización de `LoadBalancer` y `MCPHandler` para usar la configuración centralizada.

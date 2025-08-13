@@ -90,6 +90,23 @@ def create_app():
             print(f"Error in create_task endpoint: {e}")
             raise HTTPException(status_code=500, detail=f"Error processing task: {str(e)}")
 
+    @app.get("/api/v1/tasks/{task_id}", response_model=TaskResponse)
+    async def get_task_status(task_id: str):
+        orchestration_engine = get_orchestration_engine()
+        if not orchestration_engine:
+            raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
+
+        task_state = orchestration_engine.task_state_manager.get_task_state(task_id)
+        if not task_state:
+            raise HTTPException(status_code=404, detail="Task not found.")
+
+        return TaskResponse(
+            task_id=task_id,
+            status=task_state.get("status"),
+            result=task_state.get("payload", {}).get("result"),
+            error=task_state.get("error")
+        )
+
     @app.get("/api/v1/metrics", response_model=MetricsResponse)
     async def get_metrics():
         orchestration_engine = get_orchestration_engine()

@@ -1,41 +1,20 @@
 # Load Balancer
 
-import json
-import os
+from src.config.config_loader import config
 
 class LoadBalancer:
-    def __init__(self, config_path='src/config/configuration.json'):
+    def __init__(self):
         """
-        Initializes the Load Balancer, loading its rules from the configuration file.
+        Initializes the Load Balancer, using the centralized configuration.
         """
-        self.llm_engines = {}
-        self.rules = []
-        self.default_engine = None
-        self._load_configuration(config_path)
+        self.llm_engines = config.get("llm_engines", {})
+        lb_rules = config.get("load_balancer_rules", {})
+        self.rules = lb_rules.get("rules", [])
+        self.default_engine = lb_rules.get("default_engine")
         print("Load Balancer initialized.")
-
-    def _load_configuration(self, config_path: str):
-        """
-        Loads engine configurations and load balancer rules from the specified JSON file.
-        """
-        print(f"Loading configuration from '{config_path}'...")
-        try:
-            if os.path.exists(config_path):
-                with open(config_path, 'r') as f:
-                    config = json.load(f)
-                
-                self.llm_engines = config.get("llm_engines", {})
-                lb_rules = config.get("load_balancer_rules", {})
-                self.rules = lb_rules.get("rules", [])
-                self.default_engine = lb_rules.get("default_engine")
-                
-                print(f"Engines configured: {list(self.llm_engines.keys())}")
-                print(f"Rules loaded: {len(self.rules)}")
-                print(f"Default engine: {self.default_engine}")
-            else:
-                print(f"Warning: Configuration file not found at '{config_path}'.")
-        except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"Error loading configuration: {e}")
+        print(f"Engines configured: {list(self.llm_engines.keys())}")
+        print(f"Rules loaded: {len(self.rules)}")
+        print(f"Default engine: {self.default_engine}")
 
     def select_llm_engine(self, task_details: dict) -> str | None:
         """
@@ -59,8 +38,30 @@ class LoadBalancer:
             condition = rule.get("condition", "")
             target_engine = rule.get("engine")
 
+            # Condition check for agent name
+            if "agent.is_one_of" in condition:
+                agent_list_str = condition.split("['")[1].split("']")[0]
+                agent_list = [agent.strip() for agent in agent_list_str.split(',')]
+                if task_details.get('agent') in agent_list:
+                    if target_engine in available_engines:
+                        print(f"Rule matched: Agent is one of {agent_list}. Selected engine: {target_engine}")
+                        return target_engine
+                    else:
+                        print(f"Rule matched for agent in {agent_list}, but target engine '{target_engine}' is not available.")
+            
+            # Condition check for agent name and prompt content
+            elif "agent.is" in condition and "prompt.contains" in condition:
+                agent_name = condition.split("agent.is('")[1].split("')")[0]
+                keyword = condition.split("prompt.contains('")[1].split("')")[0]
+                if task_details.get('agent') == agent_name and keyword in prompt:
+                    if target_engine in available_engines:
+                        print(f"Rule matched: Agent is '{agent_name}' and prompt contains '{keyword}'. Selected engine: {target_engine}")
+                        return target_engine
+                    else:
+                        print(f"Rule matched for agent '{agent_name}' and prompt '{keyword}', but target engine '{target_engine}' is not available.")
+
             # Simple condition check: "prompt.contains('keyword')"
-            if "prompt.contains" in condition:
+            elif "prompt.contains" in condition:
                 keyword = condition.split("'")[1]
                 if keyword in prompt:
                     if target_engine in available_engines:
