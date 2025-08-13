@@ -11,16 +11,21 @@ class PlannerAgent:
         and creates an ordered plan of action.
         """
         print(f"Creating plan for task: {task_description}")
-        # Placeholder for plan generation logic
-        # This would involve breaking down the task, identifying dependencies,
-        # and estimating effort or assigning roles if possible.
-        plan = [
-            {"step": 1, "description": f"Understand high-level design: {high_level_design}"},
-            {"step": 2, "description": f"Break down task: {task_description} into sub-tasks"},
-            {"step": 3, "description": "Define checkpoints for each sub-task"},
-            {"step": 4, "description": "Order sub-tasks logically"},
-            {"step": 5, "description": "Output the final plan"}
-        ]
+        
+        # Improved plan generation logic:
+        # Break down the task description into smaller, actionable steps.
+        # This is a simplified approach; a real implementation would use an LLM.
+        sub_tasks = [task.strip() for task in task_description.split('.') if task.strip()]
+        
+        plan = []
+        plan.append({"step": 1, "description": f"Understand high-level design: {high_level_design}"})
+        
+        for i, sub_task in enumerate(sub_tasks):
+            plan.append({"step": i + 2, "description": f"Execute sub-task: {sub_task}"})
+            
+        # Add a final step for review or integration
+        plan.append({"step": len(sub_tasks) + 2, "description": "Review and integrate all sub-tasks"})
+        
         return plan
 
     def add_checkpoint(self, plan: list[dict], checkpoint_description: str) -> list[dict]:
