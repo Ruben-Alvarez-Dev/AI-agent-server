@@ -183,7 +183,10 @@ def initialize_core_components():
 
     # Ensure OrchestrationEngine is instantiated only once
     if orchestration_engine is None:
-        orchestration_engine = OrchestrationEngine() # Instantiate the class defined above
+        # orchestration_engine = OrchestrationEngine() # Instantiate the class defined above
+        # The class OrchestrationEngine is defined above, so we can instantiate it directly.
+        # The previous import was causing a NameError.
+        orchestration_engine = OrchestrationEngine()
         
         # Initialize and set TaskStateManager
         from src.tasks_state.task_state_manager import TaskStateManager
