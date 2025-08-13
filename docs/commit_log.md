@@ -34,7 +34,7 @@
 - Committed and pushed changes to the main branch.
 
 ## Commit 8: docs: Update commit log with OrchestrationEngine and agent details
-- Added entries to `plan/logs/commit_log.md` for previous commits related to agents and OrchestrationEngine integration.
+- Added entries to `docs/commit_log.md` for previous commits related to agents and OrchestrationEngine integration.
 - Committed and pushed changes to the main branch.
 
 ## Commit 9: fix: Correct OrchestrationEngine syntax errors and global variable access
