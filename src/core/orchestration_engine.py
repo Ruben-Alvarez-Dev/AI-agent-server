@@ -20,6 +20,7 @@ from src.agents.productivity.teacher_agent import TeacherAgent
 from src.agents.transversal.email_management_agent import EmailManagementAgent
 from src.agents.transversal.personal_trainer_agent import PersonalTrainerAgent
 from src.agents.transversal.document_management_agent import DocumentManagementAgent
+from src.agents.transversal.photo_management_agent import PhotoManagementAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -142,6 +143,12 @@ class OrchestrationEngine:
             print("DocumentManagementAgent loaded.")
         except ImportError:
             print("DocumentManagementAgent not found.")
+
+        try:
+            agents['photo_management'] = PhotoManagementAgent()
+            print("PhotoManagementAgent loaded.")
+        except ImportError:
+            print("PhotoManagementAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
