@@ -38,101 +38,80 @@ class MetricsResponse(BaseModel):
 # Initialize FastAPI app
 app = FastAPI()
 
-# Placeholder for core components
-orchestration_engine = None
+# This global variable will hold the single instance of the OrchestrationEngine
+orchestration_engine_instance = None
 
-def initialize_core_components():
-    """Initializes core components like OrchestrationEngine and loads agents."""
-    global orchestration_engine
-    if orchestration_engine is None:
+def get_orchestration_engine():
+    """
+    Returns the singleton instance of the OrchestrationEngine, creating it if it doesn't exist.
+    """
+    global orchestration_engine_instance
+    if orchestration_engine_instance is None:
         from src.core.orchestration_engine import OrchestrationEngine
-        orchestration_engine = OrchestrationEngine()
-        # The OrchestrationEngine's __init__ and initialize_core_components will handle loading agents, etc.
-        print("OrchestrationEngine instance obtained.")
+        orchestration_engine_instance = OrchestrationEngine()
+    return orchestration_engine_instance
 
-# Initialize components on startup
-initialize_core_components()
-
-@app.post("/api/v1/tasks", response_model=TaskResponse)
-async def create_task(request: TaskRequest):
+def create_app():
     """
-    Endpoint to create and process a new task.
-    Routes the request to the Orchestration Engine.
+    Factory function to create and configure the FastAPI application.
     """
-    if not orchestration_engine:
-        raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
-
-    try:
-        task_id = orchestration_engine.process_request(request.prompt)
-        
-        if task_id:
-            # Retrieve the initial status from the task state manager
-            task_state = orchestration_engine.task_state_manager.get_task_state(task_id)
-            status = task_state.get("status") if task_state else "Unknown"
-            return TaskResponse(task_id=task_id, status=status)
-        else:
-            raise HTTPException(status_code=500, detail="Failed to create task.")
-
-    except Exception as e:
-        # Log the exception for debugging
-        print(f"Error in create_task endpoint: {e}")
-        raise HTTPException(status_code=500, detail=f"Error processing task: {str(e)}")
-
-@app.get("/api/v1/metrics", response_model=MetricsResponse)
-async def get_metrics():
-    """
-    Endpoint to retrieve metrics about the LLM-Server's performance and status.
-    """
-    if not orchestration_engine:
-        raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
-
-    # Retrieve metrics from the Orchestration Engine and its components
-    # For now, these are simulated values. In a real implementation,
-    # these would be collected from the actual running components.
+    app = FastAPI(title="AI Agent Server", version="1.0.0")
     
-    # Simulated metrics
-    metrics_data = {
-        "server_status": "online",
-        "llm_status": {},
-        "tokens_per_second": None,
-        "average_response_time": None,
-        "total_requests": 0,
-        "active_tasks": 0,
-        "queue_length": 0,
-        "success_rate": None,
-        "api_costs": None
-    }
+    # Initialize the Orchestration Engine on startup
+    @app.on_event("startup")
+    async def startup_event():
+        get_orchestration_engine()
+        print("FastAPI app started and OrchestrationEngine is ready.")
 
-    # Populate LLM status from initialized engines
-    if orchestration_engine.llm_engines.get('ollama'):
-        metrics_data["llm_status"]["OllamaEngine"] = "active" # Assuming connected means active
-    if orchestration_engine.llm_engines.get('openai') and orchestration_engine.llm_engines['openai'].api_key:
-        metrics_data["llm_status"]["OpenAI Engine"] = "active"
-    elif orchestration_engine.llm_engines.get('openai') and not orchestration_engine.llm_engines['openai'].api_key:
-        metrics_data["llm_status"]["OpenAI Engine"] = "inactive (API key missing)"
-    else:
-        metrics_data["llm_status"]["OpenAI Engine"] = "not initialized"
+    @app.post("/api/v1/tasks", response_model=TaskResponse)
+    async def create_task(request: TaskRequest):
+        orchestration_engine = get_orchestration_engine()
+        if not orchestration_engine:
+            raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
 
-    # Add more detailed metrics if available from components
-    # For example, if orchestration_engine had methods to get these:
-    # if hasattr(orchestration_engine, 'get_metrics'):
-    #     engine_metrics = orchestration_engine.get_metrics()
-    #     metrics_data.update(engine_metrics)
+        try:
+            task_id = orchestration_engine.process_request(request.prompt)
+            
+            if task_id:
+                task_state = orchestration_engine.task_state_manager.get_task_state(task_id)
+                status = task_state.get("status") if task_state else "Unknown"
+                return TaskResponse(task_id=task_id, status=status)
+            else:
+                raise HTTPException(status_code=500, detail="Failed to create task.")
 
-    # Simulated performance and usage metrics
-    metrics_data["tokens_per_second"] = 150.5 # Simulated value
-    metrics_data["average_response_time"] = 0.85 # Simulated value in seconds
-    metrics_data["total_requests"] = 1500 # Simulated value
-    metrics_data["active_tasks"] = 5 # Simulated value
-    metrics_data["queue_length"] = 2 # Simulated value
-    metrics_data["success_rate"] = 0.92 # Simulated value
-    metrics_data["api_costs"] = 0.05 # Simulated value in currency units
+        except Exception as e:
+            print(f"Error in create_task endpoint: {e}")
+            raise HTTPException(status_code=500, detail=f"Error processing task: {str(e)}")
 
-    return MetricsResponse(**metrics_data)
+    @app.get("/api/v1/metrics", response_model=MetricsResponse)
+    async def get_metrics():
+        orchestration_engine = get_orchestration_engine()
+        if not orchestration_engine:
+            raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
 
-# To run this API server:
-# 1. Save this code as api_handler.py in src/core/
-# 2. Ensure you have FastAPI and Uvicorn installed: pip install fastapi uvicorn
-# 3. Run from the project root: uvicorn src.core.api_handler:app --reload
-# 4. Access the API at http://127.0.0.1:8000/api/v1/tasks or http://127.0.0.1:8000/api/v1/metrics
-#    (Note: The --reload flag is useful during development)
+        # Simulated metrics
+        metrics_data = {
+            "server_status": "online",
+            "llm_status": {},
+            "tokens_per_second": 150.5,
+            "average_response_time": 0.85,
+            "total_requests": 1500,
+            "active_tasks": 5,
+            "queue_length": 2,
+            "success_rate": 0.92,
+            "api_costs": 0.05
+        }
+
+        if orchestration_engine.llm_engines.get('ollama'):
+            metrics_data["llm_status"]["OllamaEngine"] = "active"
+        if orchestration_engine.llm_engines.get('openai') and orchestration_engine.llm_engines['openai'].api_key:
+            metrics_data["llm_status"]["OpenAI Engine"] = "active"
+        elif orchestration_engine.llm_engines.get('openai'):
+            metrics_data["llm_status"]["OpenAI Engine"] = "inactive (API key missing)"
+
+        return MetricsResponse(**metrics_data)
+
+    return app
+
+# The global 'app' variable is now created by the factory in main.py
+# This file should not be run directly with uvicorn.
