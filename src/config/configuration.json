@@ -3,12 +3,13 @@
     "rabbitmq_host": "localhost"
   },
   "llm_engines": {
-    "ollama_phi3_mini": { "source": "local", "locked": false, "toggle": true, "model": "phi3:mini" },
+    "ollama_phi3_mini": { "source": "local", "locked": true, "toggle": true, "model": "phi3:mini" },
     "ollama_tinyllama": { "source": "local", "locked": false, "toggle": true, "model": "tinyllama" },
-    "ollama_codegemma": { "source": "local", "locked": false, "toggle": true, "model": "codegemma" },
-    "ollama_gemma": { "source": "local", "locked": false, "toggle": true, "model": "gemma" },
+    "ollama_codegemma": { "source": "local", "locked": false, "toggle": true, "model": "codegemma:2b" },
+    "ollama_gemma": { "source": "local", "locked": false, "toggle": true, "model": "gemma:2b" },
     "ollama_moondream": { "source": "local", "locked": false, "toggle": true, "model": "moondream" },
-    "ollama_mathstral": { "source": "local", "locked": false, "toggle": true, "model": "mathstral" },
+    "ollama_mathstral": { "source": "local", "locked": true, "toggle": true, "model": "mathstral" },
+    "ollama_nomic_embed": { "source": "local", "locked": true, "toggle": true, "model": "nomic-embed-text" },
     "openai_gpt4": { "source": "api", "locked": true, "toggle": false, "model": "gpt-4-turbo" }
   },
   "agent_profiles": {

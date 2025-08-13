@@ -365,9 +365,12 @@ Este es el historial de commits del proyecto, generado a partir del `git log`.
 ## Commit 118: 9c66721 - docs: Create system architecture document
 - Creación del documento `doc/architecture.md` que detalla la arquitectura del sistema, los componentes principales y el flujo de comunicación.
 
-## Commit 119: XXX - feat: Implement multi-model support and config centralization
+## Commit 119: 1f54ed3 - feat: Implement multi-model support and config centralization
 - Adopción de una estrategia multi-modelo ultraligera para entornos de bajos recursos.
 - Refactorización del `OllamaEngine` para gestionar la carga dinámica de modelos.
 - Implementación del endpoint `GET /api/v1/tasks/{task_id}` para consultar el estado de las tareas.
 - Creación de un `ConfigLoader` singleton para centralizar el acceso a `configuration.json`.
 - Refactorización de `LoadBalancer` y `MCPHandler` para usar la configuración centralizada.
+
+## Commit 120: XXX - feat: Create BaseAgent class
+- Creación de la clase base abstracta `BaseAgent` en `src/agents/base_agent.py` para estandarizar la interfaz de todos los agentes.
