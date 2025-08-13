@@ -12,6 +12,7 @@ from src.agents.developer.fast_coder_agent import FastCoderAgent
 from src.agents.developer.architect_agent import ArchitectAgent
 from src.agents.developer.deep_coder_agent import DeepCoderAgent
 from src.agents.developer.qa_agent import QAAgent
+from src.agents.developer.debug_agent import DebugAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -86,6 +87,12 @@ class OrchestrationEngine:
             print("QAAgent loaded.")
         except ImportError:
             print("QAAgent not found.")
+
+        try:
+            agents['debug'] = DebugAgent()
+            print("DebugAgent loaded.")
+        except ImportError:
+            print("DebugAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
