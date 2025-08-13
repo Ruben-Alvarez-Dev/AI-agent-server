@@ -119,11 +119,11 @@ async def get_metrics():
     }
 
     # Populate LLM status from initialized engines
-    if ollama_engine:
+    if orchestration_engine.llm_engines.get('ollama'):
         metrics_data["llm_status"]["OllamaEngine"] = "active" # Assuming connected means active
-    if openai_engine and openai_engine.api_key:
+    if orchestration_engine.llm_engines.get('openai') and orchestration_engine.llm_engines['openai'].api_key:
         metrics_data["llm_status"]["OpenAI Engine"] = "active"
-    elif openai_engine and not openai_engine.api_key:
+    elif orchestration_engine.llm_engines.get('openai') and not orchestration_engine.llm_engines['openai'].api_key:
         metrics_data["llm_status"]["OpenAI Engine"] = "inactive (API key missing)"
     else:
         metrics_data["llm_status"]["OpenAI Engine"] = "not initialized"
