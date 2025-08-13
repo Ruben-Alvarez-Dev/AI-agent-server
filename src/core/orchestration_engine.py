@@ -44,14 +44,28 @@ class OrchestrationEngine:
         try:
             agents['diagnosis'] = DiagnosisAgent()
             print("DiagnosisAgent loaded.")
+        except ImportError:
+            print("DiagnosisAgent not found.")
+
+        try:
             agents['planner'] = PlannerAgent()
             print("PlannerAgent loaded.")
+        except ImportError:
+            print("PlannerAgent not found.")
+
+        try:
             agents['vision'] = VisionAgent()
             print("VisionAgent loaded.")
+        except ImportError:
+            print("VisionAgent not found.")
+
+        # Load other agents as needed...
+        # Example: If a ChatAgent exists
+        try:
             agents['chat'] = ChatAgent()
             print("ChatAgent loaded.")
-        except Exception as e:
-            print(f"Error loading agents: {e}")
+        except ImportError:
+            print("ChatAgent not found.")
         return agents
 
     def _initialize_llm_engines(self):
@@ -172,7 +186,7 @@ class OrchestrationEngine:
         """Handles requests in Plan mode."""
         planner_agent = self.agents.get('planner')
         if planner_agent:
-            design_hint = f"Based on analysis: {analysis.get('classified_nature', 'N/A')}"
+            design_hint = f"Based on guide and analysis: {analysis.get('classified_nature', 'N/A')}"
             plan = planner_agent.create_plan(design_hint, prompt)
             print(f"Planner Agent generated plan: {plan}")
             self.task_state_manager.update_task_state(task_id, new_status="Planned", new_payload={"plan": plan})
@@ -183,10 +197,18 @@ class OrchestrationEngine:
 
 # Example of how the Orchestration Engine might be initialized and used:
 if __name__ == "__main__":
-    # The engine is initialized automatically when the module is imported.
+    # Note: The initialization logic is now handled by initialize_core_components() called at the module level.
     # This block is for demonstrating usage if run as a standalone script.
-    print("\n--- Processing Example Requests ---")
+    
+    # Process some requests
+    print("\n--- Processing Requests ---")
     if orchestration_engine:
         orchestration_engine.process_request("Hello there!")
         orchestration_engine.process_request("Can you summarize this document for me?")
         orchestration_engine.process_request("I need to develop a new feature for the UI.")
+        orchestration_engine.process_request("Fix this bug in the login module.")
+        orchestration_engine.process_request("What is the weather like today?")
+        orchestration_engine.process_request("Research the latest advancements in AI.")
+        orchestration_engine.process_request("This is an unknown query.")
+    else:
+        print("OrchestrationEngine is not initialized. Cannot process requests.")
