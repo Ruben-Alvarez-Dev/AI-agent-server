@@ -23,6 +23,7 @@ from src.agents.transversal.document_management_agent import DocumentManagementA
 from src.agents.transversal.photo_management_agent import PhotoManagementAgent
 from src.agents.transversal.file_indexing_agent import FileIndexingAgent
 from src.agents.transversal.terminal_automator_agent import TerminalAutomatorAgent
+from src.agents.transversal.excel_agent import ExcelAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -163,6 +164,12 @@ class OrchestrationEngine:
             print("TerminalAutomatorAgent loaded.")
         except ImportError:
             print("TerminalAutomatorAgent not found.")
+
+        try:
+            agents['excel'] = ExcelAgent()
+            print("ExcelAgent loaded.")
+        except ImportError:
+            print("ExcelAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
