@@ -63,30 +63,15 @@ async def create_task(request: TaskRequest):
         raise HTTPException(status_code=503, detail="Orchestration Engine not available.")
 
     try:
-        # Process the request through the orchestration engine
-        # The engine will use DiagnosisAgent to determine the mode and route
-        # For simplicity, we'll directly call a simulated process_request
-        # In a real scenario, this would be more complex, involving task state management
+        task_id = orchestration_engine.process_request(request.prompt)
         
-        # Simulate the engine's process_request call
-        # The engine would internally call DiagnosisAgent, then route to other agents
-        # For now, we'll just simulate a response based on the prompt
-        
-        # Simplified simulation: if prompt contains 'plan', assume Plan mode
-        if "plan" in request.prompt.lower():
-            simulated_result = "Simulated Plan mode execution: Task planned."
-            status = "Planned"
-        elif "summarize" in request.prompt.lower():
-            simulated_result = "Simulated Agent mode execution: Task summarized."
-            status = "Completed"
+        if task_id:
+            # Retrieve the initial status from the task state manager
+            task_state = orchestration_engine.task_state_manager.get_task_state(task_id)
+            status = task_state.get("status") if task_state else "Unknown"
+            return TaskResponse(task_id=task_id, status=status)
         else:
-            simulated_result = "Simulated Chat mode execution: Responded to query."
-            status = "Completed"
-
-        # Generate a task ID (this should ideally be handled by the engine or task manager)
-        task_id = f"task_{hash(request.prompt + request.profile + request.role)}"
-
-        return TaskResponse(task_id=task_id, status=status, result=simulated_result)
+            raise HTTPException(status_code=500, detail="Failed to create task.")
 
     except Exception as e:
         # Log the exception for debugging

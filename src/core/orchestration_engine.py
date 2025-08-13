@@ -129,7 +129,7 @@ class OrchestrationEngine:
         """
         if not self.diagnosis_agent:
             print("DiagnosisAgent not available. Cannot process request.")
-            return
+            return None
 
         print(f"Orchestration Engine received request: '{user_prompt}'")
 
@@ -151,7 +151,7 @@ class OrchestrationEngine:
         )
         if not task_id:
             print("Failed to create task state. Cannot proceed.")
-            return
+            return None
 
         # 3. Route based on analysis
         if confidence < 0.7:
@@ -168,6 +168,8 @@ class OrchestrationEngine:
             error_msg = f"Unknown operational mode: {operational_mode}"
             print(error_msg)
             self.task_state_manager.fail_task(task_id, error_message=error_msg)
+        
+        return task_id
 
     def _handle_chat_mode(self, task_id: str, prompt: str):
         """Handles requests in Chat mode."""
