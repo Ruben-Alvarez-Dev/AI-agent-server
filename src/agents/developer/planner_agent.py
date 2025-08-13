@@ -18,13 +18,13 @@ class PlannerAgent:
         sub_tasks = [task.strip() for task in task_description.split('.') if task.strip()]
         
         plan = []
-        plan.append({"step": 1, "description": f"Understand high-level design: {high_level_design}"})
+        plan.append({"step": 1, "description": f"Understand high-level design: {high_level_design}", "status": "pending"})
         
         for i, sub_task in enumerate(sub_tasks):
-            plan.append({"step": i + 2, "description": f"Execute sub-task: {sub_task}"})
+            plan.append({"step": i + 2, "description": f"Execute sub-task: {sub_task}", "status": "pending"})
             
         # Add a final step for review or integration
-        plan.append({"step": len(sub_tasks) + 2, "description": "Review and integrate all sub-tasks"})
+        plan.append({"step": len(sub_tasks) + 2, "description": "Review and integrate all sub-tasks", "status": "pending"})
         
         return plan
 
@@ -33,7 +33,7 @@ class PlannerAgent:
         Adds a new checkpoint to an existing plan.
         """
         new_step_number = len(plan) + 1
-        new_checkpoint = {"step": new_step_number, "description": checkpoint_description}
+        new_checkpoint = {"step": new_step_number, "description": checkpoint_description, "status": "pending"}
         plan.append(new_checkpoint)
         print(f"Added checkpoint: {checkpoint_description}")
         return plan
