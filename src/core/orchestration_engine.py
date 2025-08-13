@@ -176,10 +176,26 @@ class OrchestrationEngine:
                         if task_state_manager and task_id:
                             task_state_manager.update_task_state(task_id, new_status="Completed", final_result=response, event_description=f"Processed by {target_role}.")
                     elif hasattr(agent_instance, 'generate_response'): # For LLM agents
-                        response = agent_instance.generate_response(user_prompt)
-                        print(f"Agent response: {response}")
-                        if task_state_manager and task_id:
-                            task_state_manager.update_task_state(task_id, new_status="Completed", final_result=response, event_description=f"Generated response by {target_role}.")
+                        # Select LLM engine using LoadBalancer
+                        selected_llm_engine = None
+                        if load_balancer:
+                            # Pass task details to load balancer for selection
+                            selected_llm_engine_name = load_balancer.select_llm_engine({"prompt": user_prompt, "profile": target_profile, "role": target_role})
+                            if selected_llm_engine_name == "ollama_llama3" and ollama_engine:
+                                selected_llm_engine = ollama_engine
+                            elif selected_llm_engine_name == "openai_gpt4" and openai_engine:
+                                selected_llm_engine = openai_engine
+                            # Add more conditions for other LLM engines
+                        
+                        if selected_llm_engine:
+                            response = selected_llm_engine.generate_response(user_prompt)
+                            print(f"LLM Engine response: {response}")
+                            if task_state_manager and task_id:
+                                task_state_manager.update_task_state(task_id, new_status="Completed", final_result=response, event_description=f"Generated response by {target_role} via {selected_llm_engine.__class__.__name__}.")
+                        else:
+                            print(f"No suitable LLM engine found or available for {target_role}.")
+                            if task_state_manager and task_id:
+                                task_state_manager.fail_task(task_id, error_message=f"No LLM engine available for {target_role}.")
                     else:
                         print(f"Agent {target_role} does not have a suitable method to process the request.")
                         if task_state_manager and task_id:
@@ -230,34 +246,3 @@ class OrchestrationEngine:
 #     orchestration_engine.process_request("What is the weather like today?")
 #     orchestration_engine.process_request("Research the latest advancements in AI.")
 #     orchestration_engine.process_request("This is an unknown query.")
-
-</final_file_content>
-
-IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
-
-<environment_details>
-# VSCode Visible Files
-src/core/orchestration_engine.py
-
-# VSCode Open Tabs
-src/agents/developer/planner_agent.py
-plan/logs/commit_log.md
-src/agents/developer/diagnosis_agent.py
-src/agents/developer/vision_agent.py
-src/core/api_handler.py
-src/core/mcp_handler.py
-src/load_balancer/load_balancer.py
-src/llm_engines/local/ollama_engine.py
-src/tasks_state/task_state_manager.py
-src/llm_engines/api/openai_engine.py
-src/core/orchestration_engine.py
-
-# Current Time
-13/8/2025, 3:31:57 a. m. (Europe/Madrid, UTC+2:00)
-
-# Context Window Usage
-238.204 / 1000K tokens used (24%)
-
-# Current Mode
-ACT MODE
-</environment_details>
