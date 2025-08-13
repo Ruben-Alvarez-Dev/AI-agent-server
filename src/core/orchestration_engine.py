@@ -14,6 +14,7 @@ from src.agents.developer.deep_coder_agent import DeepCoderAgent
 from src.agents.developer.qa_agent import QAAgent
 from src.agents.developer.debug_agent import DebugAgent
 from src.agents.developer.research_agent import ResearchAgent
+from src.agents.productivity.financial_agent import FinancialAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -100,6 +101,12 @@ class OrchestrationEngine:
             print("ResearchAgent loaded.")
         except ImportError:
             print("ResearchAgent not found.")
+
+        try:
+            agents['financial'] = FinancialAgent()
+            print("FinancialAgent loaded.")
+        except ImportError:
+            print("FinancialAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
