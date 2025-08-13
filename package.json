@@ -1,0 +1,21 @@
+{
+  "name": "ai-agent-server",
+  "version": "1.0.0",
+  "description": "AI-agent-server",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ruben-Alvarez-Dev/AI-agent-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ruben-Alvarez-Dev/AI-agent-server/issues"
+  },
+  "homepage": "https://github.com/Ruben-Alvarez-Dev/AI-agent-server#readme",
+  "devDependencies": {
+    "@types/node": "^24.2.1"
+  }
+}
