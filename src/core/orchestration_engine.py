@@ -18,6 +18,7 @@ from src.agents.productivity.financial_agent import FinancialAgent
 from src.agents.productivity.writing_agent import WritingAgent
 from src.agents.productivity.teacher_agent import TeacherAgent
 from src.agents.transversal.email_management_agent import EmailManagementAgent
+from src.agents.transversal.personal_trainer_agent import PersonalTrainerAgent
 from src.agents.general.chat_agent import ChatAgent
 from src.tasks_state.task_state_manager import TaskStateManager
 from src.load_balancer.load_balancer import LoadBalancer
@@ -128,6 +129,12 @@ class OrchestrationEngine:
             print("EmailManagementAgent loaded.")
         except ImportError:
             print("EmailManagementAgent not found.")
+
+        try:
+            agents['personal_trainer'] = PersonalTrainerAgent()
+            print("PersonalTrainerAgent loaded.")
+        except ImportError:
+            print("PersonalTrainerAgent not found.")
 
         # Load other agents as needed...
         # Example: If a ChatAgent exists
