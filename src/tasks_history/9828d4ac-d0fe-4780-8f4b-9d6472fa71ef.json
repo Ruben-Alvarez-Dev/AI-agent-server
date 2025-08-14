@@ -1,0 +1,27 @@
+{
+    "task_id": "9828d4ac-d0fe-4780-8f4b-9d6472fa71ef",
+    "prompt": "Hola, \u00bfqui\u00e9n eres?",
+    "status": "Completed",
+    "payload": {
+        "analysis": {
+            "original_prompt": "Hola, \u00bfqui\u00e9n eres?",
+            "classified_nature": "general_query",
+            "operational_mode": "Chat",
+            "target_profile": "General",
+            "target_role": "Chat-Agent",
+            "confidence_score": 0.75
+        }
+    },
+    "history": [
+        {
+            "timestamp": "2025-08-14T02:12:26.237702",
+            "event": "Task created: Hola, \u00bfqui\u00e9n eres?"
+        },
+        {
+            "timestamp": "2025-08-14T02:12:26.238165",
+            "event": "Task finalized with status: Completed"
+        }
+    ],
+    "result": "That's an interesting point. Tell me more.",
+    "error": null
+}

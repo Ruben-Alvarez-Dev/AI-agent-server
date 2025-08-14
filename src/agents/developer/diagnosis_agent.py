@@ -55,6 +55,12 @@ class DiagnosisAgent:
             analysis_result["target_profile"] = "Developer"
             analysis_result["target_role"] = "Research-Agent"
             analysis_result["confidence_score"] = 0.85
+        elif any(cmd in prompt_lower.split() for cmd in ["ls", "pwd", "echo", "git", "docker", "python", "pip", "curl"]):
+            analysis_result["classified_nature"] = "terminal_command"
+            analysis_result["operational_mode"] = "Agent"
+            analysis_result["target_profile"] = "Transversal"
+            analysis_result["target_role"] = "Terminal-Automator-Agent"
+            analysis_result["confidence_score"] = 0.98
         else:
             # Default for general queries or unrecognized patterns
             analysis_result["classified_nature"] = "general_query"

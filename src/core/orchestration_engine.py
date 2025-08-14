@@ -49,7 +49,7 @@ class OrchestrationEngine:
         
         # Load agents
         self.agents = self._load_agents()
-        self.diagnosis_agent = self.agents.get('diagnosis')
+        self.diagnosis_agent = self.agents.get('Diagnosis-Agent')
 
         # Initialize LLM Engines
         self.llm_engines = self._initialize_llm_engines()
@@ -66,35 +66,41 @@ class OrchestrationEngine:
         """Loads all available agents."""
         agents = {}
         print("Loading agents...")
-        # Note: The following imports are placeholders.
-        # In a real application, these would be dynamically loaded.
-        try:
-            agents['Diagnosis-Agent'] = DiagnosisAgent()
-            print("DiagnosisAgent loaded.")
-        except ImportError:
-            print("DiagnosisAgent not found.")
         
-        try:
-            agents['Writing-Agent'] = WritingAgent(self)
-            print("WritingAgent loaded.")
-        except ImportError:
-            print("WritingAgent not found.")
-        
-        try:
-            agents['Fast-Coder-Agent'] = FastCoderAgent(self)
-            print("FastCoderAgent loaded.")
-        except ImportError:
-            print("FastCoderAgent not found.")
-        
-        # ... Load other agents similarly, passing `self` (the orchestration_engine instance)
-        # Example:
-        try:
-            agents['Planner-Agent'] = PlannerAgent(self)
-            print("PlannerAgent loaded.")
-        except ImportError:
-            print("PlannerAgent not found.")
+        agent_classes = {
+            "Diagnosis-Agent": DiagnosisAgent,
+            "Planner-Agent": PlannerAgent,
+            "Vision-Agent": VisionAgent,
+            "Fast-Coder-Agent": FastCoderAgent,
+            "Architect-Agent": ArchitectAgent,
+            "Deep-Coder-Agent": DeepCoderAgent,
+            "QA-Agent": QAAgent,
+            "Debug-Agent": DebugAgent,
+            "Research-Agent": ResearchAgent,
+            "Financial-Agent": FinancialAgent,
+            "Writing-Agent": WritingAgent,
+            "Teacher-Agent": TeacherAgent,
+            "Email-Management-Agent": EmailManagementAgent,
+            "Personal-Trainer-Agent": PersonalTrainerAgent,
+            "Document-Management-Agent": DocumentManagementAgent,
+            "Photo-Management-Agent": PhotoManagementAgent,
+            "File-Indexing-Agent": FileIndexingAgent,
+            "Terminal-Automator-Agent": TerminalAutomatorAgent,
+            "Excel-Agent": ExcelAgent,
+            "Chat-Agent": ChatAgent
+        }
 
-        # For now, we only load the Diagnosis and Writing agents.
+        for role, agent_class in agent_classes.items():
+            try:
+                # The DiagnosisAgent and ChatAgent are special as they don't need the engine instance
+                if agent_class in [DiagnosisAgent, ChatAgent]:
+                    agents[role] = agent_class()
+                else:
+                    agents[role] = agent_class(self)
+                print(f"{agent_class.__name__} loaded.")
+            except Exception as e:
+                print(f"Failed to load {agent_class.__name__}: {e}")
+
         self.diagnosis_agent = agents.get('Diagnosis-Agent')
         return agents
 
@@ -252,7 +258,7 @@ class OrchestrationEngine:
 
     def _handle_chat_mode(self, task_id: str, prompt: str):
         """Handles requests in Chat mode."""
-        chat_agent = self.agents.get('chat')
+        chat_agent = self.agents.get('Chat-Agent')
         if chat_agent:
             response = chat_agent.process_message(prompt)
             print(f"Chat Agent response: {response}")

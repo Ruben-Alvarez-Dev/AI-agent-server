@@ -43,12 +43,13 @@ class TaskStateManager:
             print(f"Error writing task state file {file_path}: {e}")
             return False
 
-    def create_task_state(self, prompt: str, initial_status: str = "Pending", initial_payload: dict = None) -> str | None:
+    def create_task_state(self, prompt: str, initial_status: str = "Pending", initial_payload: dict = None, task_id: str = None) -> str | None:
         """
-        Creates a new task state file with a unique ID.
+        Creates a new task state file. If task_id is not provided, a new one is generated.
         Returns the task_id.
         """
-        task_id = str(uuid.uuid4())
+        if task_id is None:
+            task_id = str(uuid.uuid4())
         state_file_path = os.path.join(self.base_dir, f"{task_id}.json")
         
         task_data = {
@@ -74,7 +75,18 @@ class TaskStateManager:
         if os.path.exists(state_file_path):
             return self._read_state_file(state_file_path)
         else:
-            print(f"Task state file not found for task ID: {task_id}")
+            # If not found in active tasks, check history
+            return self.get_task_from_history(task_id)
+
+    def get_task_from_history(self, task_id: str) -> dict | None:
+        """
+        Retrieves the state of a completed/failed task from the history directory.
+        """
+        history_file_path = os.path.join(self.history_dir, f"{task_id}.json")
+        if os.path.exists(history_file_path):
+            return self._read_state_file(history_file_path)
+        else:
+            print(f"Task not found in active state or history for task ID: {task_id}")
             return None
 
     def update_task_state(self, task_id: str, new_status: str = None, new_payload: dict = None):

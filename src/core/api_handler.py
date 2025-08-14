@@ -100,10 +100,11 @@ def create_app():
         if not task_state:
             raise HTTPException(status_code=404, detail="Task not found.")
 
+        result = task_state.get("result") or task_state.get("payload", {}).get("result")
         return TaskResponse(
             task_id=task_id,
             status=task_state.get("status"),
-            result=task_state.get("payload", {}).get("result"),
+            result=result,
             error=task_state.get("error")
         )
 

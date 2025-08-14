@@ -1,0 +1,27 @@
+{
+    "task_id": "2d5841df-11ac-40d0-8254-91354a39f00d",
+    "prompt": "Hola, \u00bfqui\u00e9n eres?",
+    "status": "Failed",
+    "payload": {
+        "analysis": {
+            "original_prompt": "Hola, \u00bfqui\u00e9n eres?",
+            "classified_nature": "general_query",
+            "operational_mode": "Chat",
+            "target_profile": "General",
+            "target_role": "Chat-Agent",
+            "confidence_score": 0.75
+        }
+    },
+    "history": [
+        {
+            "timestamp": "2025-08-14T02:10:05.592346",
+            "event": "Task created: Hola, \u00bfqui\u00e9n eres?"
+        },
+        {
+            "timestamp": "2025-08-14T02:10:05.593958",
+            "event": "Task finalized with status: Failed"
+        }
+    ],
+    "result": null,
+    "error": "Chat Agent not available."
+}

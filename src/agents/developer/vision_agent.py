@@ -2,8 +2,11 @@
 
 import logging
 import json
+from typing import TYPE_CHECKING
 from src.agents.base_agent import BaseAgent
-from src.core.orchestration_engine import OrchestrationEngine # Import OrchestrationEngine to access LLM engines
+
+if TYPE_CHECKING:
+    from src.core.orchestration_engine import OrchestrationEngine # Import OrchestrationEngine to access LLM engines
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,7 +16,7 @@ class VisionAgent(BaseAgent):
     The VisionAgent is responsible for interpreting visual input, such as images,
     to extract relevant information or provide textual descriptions.
     """
-    def __init__(self, orchestration_engine: OrchestrationEngine):
+    def __init__(self, orchestration_engine: 'OrchestrationEngine'):
         """
         Initializes the VisionAgent with the orchestration engine.
         """

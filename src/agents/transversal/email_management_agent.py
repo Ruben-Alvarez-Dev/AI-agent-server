@@ -2,8 +2,11 @@
 
 import logging
 import json
+from typing import TYPE_CHECKING
 from src.agents.base_agent import BaseAgent
-from src.core.orchestration_engine import OrchestrationEngine
+
+if TYPE_CHECKING:
+    from src.core.orchestration_engine import OrchestrationEngine
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -12,7 +15,7 @@ class EmailManagementAgent(BaseAgent):
     """
     The EmailManagementAgent is responsible for managing emails.
     """
-    def __init__(self, orchestration_engine: OrchestrationEngine):
+    def __init__(self, orchestration_engine: 'OrchestrationEngine'):
         """
         Initializes the EmailManagementAgent with the orchestration engine.
         """

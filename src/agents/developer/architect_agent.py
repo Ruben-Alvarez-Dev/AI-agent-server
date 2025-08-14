@@ -2,8 +2,11 @@
 
 import logging
 import json
+from typing import TYPE_CHECKING
 from src.agents.base_agent import BaseAgent
-from src.core.orchestration_engine import OrchestrationEngine
+
+if TYPE_CHECKING:
+    from src.core.orchestration_engine import OrchestrationEngine
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,7 +16,7 @@ class ArchitectAgent(BaseAgent):
     The ArchitectAgent is responsible for creating high-level technical designs and architectures.
     It takes a high-level requirement and returns a structured architectural plan.
     """
-    def __init__(self, orchestration_engine: OrchestrationEngine):
+    def __init__(self, orchestration_engine: 'OrchestrationEngine'):
         """
         Initializes the ArchitectAgent with the orchestration engine.
         """
